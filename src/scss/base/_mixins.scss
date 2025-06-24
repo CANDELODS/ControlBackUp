@@ -1,0 +1,87 @@
+@use 'variables' as v;
+
+/** Media Queries **/
+@mixin telefono {
+    @media (min-width: v.$telefono) {
+        @content;
+    }
+}
+
+@mixin tablet {
+    @media (min-width: v.$tablet) {
+        @content;
+    }
+}
+
+@mixin xl-tablet {
+    @media (min-width: v.$xl-tablet) {
+        @content;
+    }
+}
+
+@mixin desktop {
+    @media (min-width: v.$desktop) {
+        @content;
+    }
+}
+
+@mixin xl_desktop {
+    @media (min-width: v.$xl_desktop) {
+        @content;
+    }
+}
+
+@mixin boton($bgColor, $colorTexto) {
+    background-color: $bgColor;
+    padding: 1.5rem 4rem;
+    color: $colorTexto;
+    font-size: 1.8rem;
+    font-weight: 700;
+    border: none;
+    transition-property: background-color, box-shadow;
+    transition-duration: .3s;
+    text-align: center;
+    width: 100%;
+    display: inline-block;
+    border-radius: .5rem;
+    border: 2px solid transparent;
+    transition: border, box-shadow, background-color 0.5s ease;
+
+    &:hover {
+        border: 2px solid $bgColor;
+        box-shadow: 0 0 10px $bgColor;
+        background-color: transparent;
+        cursor: pointer;
+    }
+}
+
+@mixin grid($columnas, $espaciado ) {
+    display: grid;
+    gap: $espaciado;
+    grid-template-columns: repeat($columnas, 1fr);
+}
+
+
+@mixin contenedor {
+    width: min(95%, 120rem);
+    margin: 0 auto;
+}
+
+@mixin contenedor-md {
+    width: min(95%, 80rem);
+    margin: 0 auto;
+}
+
+@mixin contenedor-sm {
+    width: min(95%, 60rem);
+    margin: 0 auto;
+}
+
+@mixin texto-fluido($min, $max) {
+    //El Valor De En Medio Es El Que No Aplica Ni En $Min Ni $Max Sin Embargo Será El Más Común (Valor Deseado)
+    font-size: clamp($min, -0.8rem + 10vw, $max);
+}
+
+@mixin sombra {
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+}

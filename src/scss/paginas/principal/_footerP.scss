@@ -1,0 +1,87 @@
+@use 'base/variables' as v;
+@use 'base/mixins' as m;
+
+.footer {
+    // background-color: v.$gris;
+    @include m.contenedor;
+
+    &__grid {
+        @include m.grid(1, 1rem);
+        align-items: center;
+        padding: 1.5rem 0 1.5rem 0;
+
+        @include m.tablet {
+            @include m.grid(2, 1rem);
+            padding: 1.5rem 3rem 1.5rem 3rem;
+
+        }
+    }
+
+    &__aclaracion {
+        border-bottom: 1px solid white;
+        padding-bottom: 1rem;
+
+        @include m.tablet {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+    }
+
+    &__p-aclaracion {
+        all: unset;
+        color: white;
+        font-size: 1.4rem;
+        padding: 0 0 1rem 0;
+        text-align: left;
+    }
+
+    &__link {
+        text-decoration: none;
+        color: white;
+        font-weight: v.$bold;
+        transition: color 0.5s ease;
+
+        &:hover {
+            color: v.$principal;
+        }
+    }
+
+    &__informes {}
+}
+
+.informes {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+
+    &__p {
+        margin: 0;
+        padding: 0;
+        color: white;
+        font-size: 1.3rem;
+        text-align: center;
+
+        @include m.tablet {
+            font-size: 1.7rem;
+        }
+    }
+
+    &__enlace {
+        @include m.boton(v.$verdeC, v.$blanco);
+        font-size: 1.4rem;
+        width: auto;
+
+        @include m.tablet {
+            font-size: 1.8rem;
+        }
+    }
+
+    &__completo {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+}

@@ -1,0 +1,46 @@
+<?php 
+
+require_once __DIR__ . '/../includes/app.php';
+
+use MVC\Router;
+use Controllers\AuthController;
+use Controllers\CompletaController;
+use Controllers\ConsejosController;
+use Controllers\EquiposController;
+use Controllers\IncrementalController;
+use Controllers\PrincipalController;
+
+$router = new Router();
+
+
+// Login
+$router->get('/login', [AuthController::class, 'login']);
+$router->post('/login', [AuthController::class, 'login']);
+$router->post('/logout', [AuthController::class, 'logout']);
+
+//Principal
+$router->get('/', [PrincipalController::class, 'principal']);
+// $router->post('/', [PrincipalController::class, 'principal']);
+
+// Incremental
+$router->get('/incremental', [IncrementalController::class, 'incremental']);
+$router->post('/incremental', [IncrementalController::class, 'incremental']);
+
+// Completa
+$router->get('/completa', [CompletaController::class, 'completa']);
+$router->post('/completa', [CompletaController::class, 'completa']);
+
+// Equipos
+$router->get('/equipos', [EquiposController::class, 'equipos']);
+$router->post('/crear-equipo', [EquiposController::class, 'crear']);
+$router->get('/crear-equipo', [EquiposController::class, 'crear']);
+$router->post('/editar-equipo', [EquiposController::class, 'editar']);
+$router->get('/editar-equipo', [EquiposController::class, 'editar']);
+$router->post('/eliminar-equipo', [EquiposController::class, 'eliminar']);
+
+
+// Consejos
+$router->get('/consejos', [ConsejosController::class, 'consejos']);
+$router->post('/consejos', [ConsejosController::class, 'consejos']);
+
+$router->comprobarRutas();

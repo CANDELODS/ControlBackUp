@@ -1,0 +1,35 @@
+@use 'base/variables' as v;
+@use 'base/mixins' as m;
+
+//ANIMACIONES NAVEGACIÓN
+
+//Animación para el header y navegación, se activa al hacer scroll y cambia diferentes estilos para no interferir
+//Con la visualización de la página; Se usa en la página index.html
+@keyframes header {
+    to {
+        box-shadow: 0px 3px 3px black;
+        // background-color: #313131;
+        // background-color: rgb(255, 255, 255, .4);
+        // backdrop-filter: blur(5px);
+        // font-size: 2rem;
+        // top: -2rem;
+        // border-radius: 0 0 .5rem .5rem;
+        // color: black;
+    }
+}
+
+//Animación para complementar la animación del header, también se activa al hacer scroll y cambia el color del
+//Enlace y del logo; Se usa en la página _navegacion.scss
+@keyframes cambiarColorEnlace {
+    to {
+        color: black;
+    }
+}
+
+//Animación para complementar la animación del header, también se activa al hacer scroll y cambia el color del
+//Pseudoelemento Before en el enlace y en el logo; Se usa en la página _navegacion.scss
+@keyframes cambiarColorBefore {
+    to {
+        background: linear-gradient(to right, #000000, #000000, #EAF6FF);
+    }
+}

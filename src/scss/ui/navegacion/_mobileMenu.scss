@@ -1,0 +1,17 @@
+@use 'base/variables' as v;
+@use 'base/mixins' as m;
+
+.mostrar {
+    opacity: 1;
+    padding: 2rem 0 0 1rem;
+    height: 60%;
+    position: fixed;
+    background-color: rgb(0 0 0 / .90);
+    z-index: 2;
+    transition: all 500ms ease;
+
+    @include m.tablet {
+        display: none;
+    }
+
+}

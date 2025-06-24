@@ -1,0 +1,186 @@
+@use 'base/variables' as v;
+@use 'base/mixins' as m;
+
+.header {
+    // position: fixed;
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 1;
+    animation: header linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 500px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    padding: 1rem 1.5rem 1rem 1.5rem;
+    background-color: white;
+
+    @include m.tablet {
+        justify-content: space-between;
+        top: 0;
+        left: 0;
+        // width: 100dvw;
+        gap: 0;
+        padding: 1rem 1.5rem 1rem 1.5rem;
+    }
+
+    @include m.xl-tablet {}
+
+    @include m.desktop {}
+
+    @include m.xl-desktop {}
+
+    &__logo {}
+
+    &__img {
+        width: 70%;
+
+        @include m.tablet {
+            width: 20vw;
+        }
+    }
+}
+
+.navegacion {
+    position: fixed;
+    /*Ubicar navegación en el centro*/
+    top: 15%;
+    right: 50%;
+    transform: translate(50%);
+    height: 37vh;
+    /**/
+    width: 50vw;
+    border-radius: 2rem;
+    display: flex;
+    flex-direction: column;
+    /*Mover links verticalmente*/
+    justify-content: center;
+    gap: 2rem;
+    /**/
+
+    align-items: center;
+    padding: 1rem;
+    background-color: #1c1c1c;
+    /*Cortina que resalta la NavBar*/
+    box-shadow: 0 0 0 100vmax rgba(0, 0, 0, .5);
+    /**/
+    /*Esconder NavBar*/
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(50%, -25%);
+    transition: all .4s ease;
+
+    @include m.tablet {
+        position: relative;
+        top: 0;
+        right: 0;
+        transform: translate(0);
+        width: auto;
+        height: auto;
+        gap: 0;
+        padding: 0 1rem 0 0;
+        background-color: transparent;
+        box-shadow: none;
+        opacity: 1;
+        visibility: visible;
+        transform: translate(0, 0);
+    }
+
+    &__ul {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        list-style-type: none;
+        gap: 2rem;
+        padding: 0;
+
+        @include m.tablet {
+            flex-direction: row;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        @include m.xl-tablet {
+            gap: 1rem;
+        }
+
+        @include m.desktop {
+            gap: 2.5rem;
+        }
+
+        @include m.xl-desktop {
+            gap: 2.5rem;
+        }
+    }
+
+    &__enlace {
+        text-decoration: none;
+        color: white;
+        font-weight: v.$bold;
+        transition: color 0.5s ease;
+
+        @include m.tablet {
+            color: v.$negro;
+        }
+
+        &:hover {
+            color: v.$principal;
+        }
+
+        &--submit {
+            all: unset;
+            color: white;
+            font-weight: v.$bold;
+            transition: color 0.5s ease;
+
+            @include m.tablet {
+                color: v.$negro;
+            }
+
+            &:hover {
+                cursor: pointer;
+            }
+        }
+    }
+
+    &__form {}
+
+    &__movil {
+        color: v.$negro;
+        font-size: 3rem;
+
+        @include m.tablet {
+            display: none;
+        }
+    }
+
+    &__btn-salir {
+        color: black;
+        background-color: white;
+        padding: .5rem;
+        margin-bottom: 2rem;
+        border-radius: .5rem;
+
+        @include m.tablet {
+            display: none;
+        }
+    }
+
+}
+
+.mostrar {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(50%, 0);
+}
+
+.esconder {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.activo {
+    color: v.$principal;
+}

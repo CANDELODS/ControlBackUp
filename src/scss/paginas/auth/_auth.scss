@@ -1,0 +1,38 @@
+@use 'base/variables' as v;
+@use 'base/mixins' as m;
+
+.auth {
+    // @include m.contenedor;
+    background-image: linear-gradient(0deg,
+            rgba(0, 0, 0, 0.5),
+            rgba(0, 0, 0, 0.5)),
+        url(../img/fondoLogin.jpg);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-attachment: fixed;
+    background-size: cover;
+
+    display: flex;
+    justify-content: center;
+    height: 100dvh;
+    align-items: center;
+
+    &__contenedor {
+        padding: 1.5rem 1rem 1.5rem 1rem;
+        border-radius: 5.8rem;
+        background-color: white;
+        width: 90%;
+
+        @include m.tablet {
+            width: 80%;
+        }
+
+        @include m.desktop {
+            width: 70%;
+        }
+
+        @include m.xl_desktop {
+            width: 50%;
+        }
+    }
+}

@@ -1,0 +1,125 @@
+@use 'base/variables' as v;
+@use 'base/mixins' as m;
+
+.tabla {
+    @include m.contenedor-sm;
+
+    &--scroll{
+        @extend .tabla;
+        @include m.tablet{
+            overflow-y: scroll;
+            height: 40rem;
+        }
+    }
+    @include m.tablet {
+        @include m.contenedor;
+    }
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    @include m.sombra;
+
+    &__thead {
+        background-color: v.$gris;
+        color: white;
+        //Escondemos los encabezados en pantallas pequeñas
+        display: none;
+
+        @include m.tablet {
+            display: table-header-group;
+        }
+    }
+
+    &__th {
+        padding: 1rem;
+        text-align: left;
+    }
+
+    &__tr {
+        //Cambiamos el display a block para que se vea bien en pantallas pequeñas
+        display: block;
+        border-bottom: 1px solid v.$negro;
+
+        @include m.tablet {
+            display: table-row;
+        }
+
+        &:nth-child(even) {
+            background-color: v.$grisClaro;
+        }
+
+        &:hover {
+            background-color: v.$gris;
+            color: white;
+        }
+    }
+
+    &__td {
+        //Cambiamos el display a block para que se vea bien en pantallas pequeñas
+        display: block;
+        padding: 1.5rem 1rem;
+        text-align: right;
+        position: relative;
+        border-bottom: 1px solid v.$negro;
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        &::before {
+            content: attr(data-label);
+            //Posicionamos el pseudo elemento antes del contenido
+            position: absolute;
+            left: 0;
+            width: 50%;
+            text-align: left;
+            padding-left: 1rem;
+        }
+
+        @include m.tablet {
+            display: table-cell;
+            text-align: left;
+
+            &::before {
+                content: none;
+            }
+
+            border-bottom: none;
+        }
+
+        &--acciones {
+            @extend .table__td;
+            display: flex;
+            justify-content: space-around;
+            gap: 1rem;
+            align-items: center;
+
+            @include m.tablet {
+                justify-content: flex-end;
+            }
+        }
+
+    }
+
+    &__accion {
+        all: unset;
+        text-transform: uppercase;
+        font-weight: v.$bold;
+
+        &--editar {
+            @include m.boton(v.$azul, v.$blanco);
+            width: auto;
+            padding: 1.5rem;
+            font-size: 1.4rem;
+        }
+
+        &--eliminar {
+            @include m.boton(v.$principal, v.$blanco);
+            width: auto;
+            padding: 1.5rem;
+            font-size: 1.4rem;
+        }
+    }
+}

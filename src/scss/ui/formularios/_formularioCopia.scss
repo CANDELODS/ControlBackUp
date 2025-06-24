@@ -1,0 +1,44 @@
+@use 'base/variables' as v;
+@use 'base/mixins' as m;
+
+.formulario-copia {
+
+    @include m.contenedor-sm;
+    gap: 3rem;
+    display: flex;
+    flex-direction: column;
+    
+    @include m.tablet {
+        @include m.contenedor;
+        align-items: flex-end;
+    }
+
+    &__input {
+
+        &--check {
+            @extend .formulario-copia__input;
+            accent-color: v.$verdeDark;
+
+            @include m.tablet {
+                transform: scale(2);
+                width: 40%;
+            }
+        }
+    }
+
+    &__textarea {
+        resize: none;
+
+        @include m.tablet {
+            width: 100%;
+        }
+    }
+
+    &__btn {
+        @include m.boton(v.$verde, white);
+
+        @include m.tablet {
+            width: auto;
+        }
+    }
+}
