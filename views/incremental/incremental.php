@@ -35,16 +35,28 @@
                                     <?php echo $equipo->idAreas->nombreArea; ?>
                                 </td>
                                 <td data-label="Local" class="table__td">
-                                    <input type="checkbox"
-                                        class="formulario-copia__input--check checkboxes copia-local"
-                                        name="copiaLocal[]"
-                                        value="0">
+                                    <!-- Si el equipo NO hace copia local -->
+                                    <?php if ($equipo->local === '0') : ?>
+                                        <input type="hidden" name="copiaLocal[]" value="0">
+                                        <input type="checkbox" class="formulario-copia__input--check checkboxes" disabled>
+                                    <?php else : ?>
+                                        <input type="checkbox"
+                                            class="formulario-copia__input--check checkboxes copia-local"
+                                            name="copiaLocal[]"
+                                            value="0">
+                                    <?php endif; ?>
                                 </td>
                                 <td data-label="Nube" class="table__td">
-                                    <input type="checkbox"
-                                        class="formulario-copia__input--check checkboxes copia-nube"
-                                        name="copiaNube[]"
-                                        value="0">
+                                    <!-- Si el equipo NO hace copia en nube -->
+                                    <?php if ($equipo->nube === '0') : ?>
+                                        <input type="hidden" name="copiaNube[]" value="0">
+                                        <input type="checkbox" class="formulario-copia__input--check checkboxes" disabled>
+                                    <?php else : ?>
+                                        <input type="checkbox"
+                                            class="formulario-copia__input--check checkboxes copia-nube"
+                                            name="copiaNube[]"
+                                            value="0">
+                                    <?php endif; ?>
                                 </td>
                                 <td class="table__td">
                                     <textarea name="observaciones[]" class="formulario-copia__textarea"
@@ -58,7 +70,10 @@
                 <p class="text-center">No Hay Equipos Para Listar</p>
             <?php } ?>
         </div>
-        <input type="submit" class="formulario-copia__btn" value="Guardar">
+        <div class="main__fi">
+            <p class="main__f"><?php echo date('Y-m-d');?></p>
+            <input type="submit" class="formulario-copia__btn" value="Guardar">
+        </div>
     </form>
 
 </main>

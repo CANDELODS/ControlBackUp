@@ -32,7 +32,7 @@ class AuthController
                         $_SESSION['email'] = $usuario->email;
                         //Redireccionar
                         if (isAuth()) {
-                            header('Location: /');
+                            header('Location: /principal');
                         } else {
                             header('Location: /login');
                         }
@@ -57,7 +57,7 @@ class AuthController
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             session_start();
             $_SESSION = [];
-            header('Location: /login');
+            header('Location: /');
         }
     }
 

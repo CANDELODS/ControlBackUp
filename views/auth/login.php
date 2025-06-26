@@ -4,7 +4,7 @@
         require_once __DIR__ . '/../templates/alertas.php';
     ?>
         
-        <form method="post" action="/login" class="formulario">
+        <form method="post" action="/" class="formulario">
             <picture>
                 <source srcset="build/img/logo.avif" type="image/avif">
                 <source srcset="build/img/logo.webp" type="image/webp">

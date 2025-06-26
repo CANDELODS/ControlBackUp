@@ -124,6 +124,16 @@ class ActiveRecord {
         return array_shift( $resultado ) ;
     }
 
+    //Traer el total de registros
+    public static function total(){
+         $query = "SELECT COUNT(*) FROM " . static::$tabla;
+         //No usamos consultarSQL ya que no queremos crear un objeto del modelo
+         $resultado = self::$db->query($query);
+         $total = $resultado->fetch_array();
+         //Con array_shift extraemos el primer registro del arreglo
+         return array_shift($total);
+    }
+
     //Obtener el último ID insertado
     public static function ultimoId() {
         $query = "SELECT id FROM " . static::$tabla . " ORDER BY id DESC LIMIT 1";
@@ -136,6 +146,13 @@ class ActiveRecord {
         $query = "SELECT * FROM " . static::$tabla . " LIMIT ${limite} ORDER BY id DESC" ;
         $resultado = self::consultarSQL($query);
         return array_shift( $resultado ) ;
+    }
+
+    //Paginar Registros
+    public static function paginar($porPagina, $offset){
+        $query = "SELECT * FROM " . static::$tabla . " ORDER BY nombreEquipo ASC LIMIT ${porPagina} OFFSET ${offset} " ;
+        $resultado = self::consultarSQL($query);
+        return $resultado;
     }
 
     // Busqueda Where con Columna 

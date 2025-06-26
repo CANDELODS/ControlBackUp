@@ -55,4 +55,7 @@
             <p class="text-center">No Hay Equipos Para Listar</p>
         <?php } ?>
     </div>
+<?php
+    echo $paginacion;
+?>
 </main>

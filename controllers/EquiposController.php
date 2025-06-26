@@ -2,6 +2,7 @@
 
 namespace Controllers;
 
+use Classes\Paginacion;
 use Model\Areas;
 use Model\Equipos;
 use Model\Usuario;
@@ -15,12 +16,29 @@ class EquiposController
         if (!isAuth()) {
             header('Location: /login');
         }
+        //PAGINAR
+        //Obtenemos la página desde la URL y verificamos que sea un número y que no sea negativo
+        $pagina_actual = $_GET['page'];
+        $pagina_actual = filter_var($pagina_actual, FILTER_VALIDATE_INT);
+        //La función filter var devuelve un boolean, por lo cual
+        //Si devuelve false no pasará la validación, igualmente si
+        //El número es negativo
+        if(!$pagina_actual || $pagina_actual < 1){
+            header('Location: /equipos?page=1');
+        }
+        $registros_por_pagina = 8;
+        $total_registros = Equipos::total();
+        $paginacion = new Paginacion($pagina_actual, $registros_por_pagina, $total_registros);
+
         //Instanciamos el usuario y obtenemos las alertas
         $alertas = Usuario::getAlertas();
         //Instanciamos el modelo de equipos
         $equipos = new Equipos;
         // Traemos todos los equipos
-        $equipos = Equipos::all('ASC');
+        $equipos = Equipos::paginar($registros_por_pagina, $paginacion->offset());
+        if($paginacion->totalPaginas() < $pagina_actual){
+            header('Location: /equipos?page=1');
+        }
         //CRUCE DE DATOS PARA OBTENER EL NOMBRE DEL ÁREA
         //Este ForEach Tiene Como Fin Cruzar Información De La BD Sin Necesidad De Crar Un Join Desde
         //El Active Record, Este Itera Cada Evento Y Crea Una LLave La Cual Compara Con Las Que
@@ -38,7 +56,8 @@ class EquiposController
         $router->render('equipos/equipos', [
             'titulo' => 'Equipos',
             'alertas' => $alertas,
-            'equipos' => $equipos
+            'equipos' => $equipos,
+            'paginacion' => $paginacion->paginacion()
         ]);
     }
 

@@ -14,12 +14,12 @@ $router = new Router();
 
 
 // Login
-$router->get('/login', [AuthController::class, 'login']);
-$router->post('/login', [AuthController::class, 'login']);
+$router->get('/', [AuthController::class, 'login']);
+$router->post('/', [AuthController::class, 'login']);
 $router->post('/logout', [AuthController::class, 'logout']);
 
 //Principal
-$router->get('/', [PrincipalController::class, 'principal']);
+$router->get('/principal', [PrincipalController::class, 'principal']);
 // $router->post('/', [PrincipalController::class, 'principal']);
 
 // Incremental

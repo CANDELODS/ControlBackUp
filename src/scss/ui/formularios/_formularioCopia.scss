@@ -10,7 +10,6 @@
     
     @include m.tablet {
         @include m.contenedor;
-        align-items: flex-end;
     }
 
     &__input {
@@ -18,9 +17,9 @@
         &--check {
             @extend .formulario-copia__input;
             accent-color: v.$verdeDark;
-
+            transform: scale(2);
+            width: 10%;
             @include m.tablet {
-                transform: scale(2);
                 width: 40%;
             }
         }
@@ -36,9 +35,11 @@
 
     &__btn {
         @include m.boton(v.$verde, white);
+        width: auto;
 
-        @include m.tablet {
-            width: auto;
-        }
+            &:hover {
+                background-color: v.$verde;
+                border: 2px solid v.$verde;
+            }
     }
 }

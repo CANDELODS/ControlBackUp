@@ -1,6 +1,6 @@
  <header class="header">
 
-     <a href="/" class="header__logo">
+     <a href="/principal" class="header__logo">
          <picture>
              <source srcset="build/img/logo.avif" type="image/avif">
              <source srcset="build/img/logo.webp" type="image/webp">
@@ -16,7 +16,7 @@
      <nav class="navegacion" id="navegacion">
          <ul class="navegacion__ul">
              <li class="navegacion__li">
-                 <a class="navegacion__enlace" href="/" id="navegacionInicio">Inicio</a>
+                 <a class="navegacion__enlace" href="/principal" id="navegacionInicio">Inicio</a>
              </li>
              <li class="navegacion__li">
                  <a class="navegacion__enlace" href="/incremental" id="navegacionIncremental">Incremental</a>

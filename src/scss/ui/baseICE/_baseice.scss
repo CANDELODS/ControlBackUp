@@ -45,7 +45,6 @@
 
     &__btn {
         @include m.boton(v.$principalDark, white);
-        text-transform: uppercase;
 
         @include m.tablet {
             width: auto;
@@ -73,5 +72,15 @@
                 border: 2px solid v.$amarillo;
             }
         }
+    }
+
+    &__fi{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    &__f{
+        font-weight: v.$bold;
     }
 }
