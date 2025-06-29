@@ -973,10 +973,11 @@ h3 {
 }
 .eformulario__submit--c {
   width: 100%;
+  background-color: #ED241C;
+  border-color: #ED241C;
 }
 .eformulario__submit--c:hover {
-  background-color: #7F130F;
-  border: 2px solid #7F130F;
+  color: #ED241C;
 }
 
 .formulario-copia {
@@ -1017,26 +1018,21 @@ h3 {
   font-size: 1.8rem;
   font-weight: 700;
   border: none;
-  transition-property: background-color, box-shadow;
+  transition-property: background-color, color, border;
   transition-duration: 0.3s;
   text-align: center;
   text-transform: uppercase;
   width: 100%;
   display: inline-block;
   border-radius: 0.5rem;
-  border: 2px solid transparent;
-  transition: border, box-shadow, background-color 0.5s ease;
+  border: 2px solid #1CED65;
+  transition: color, border, background-color 0.5s ease;
   width: auto;
 }
 .formulario-copia__btn:hover {
-  border: 2px solid #1CED65;
-  box-shadow: 0 0 10px #1CED65;
   background-color: transparent;
+  color: #1CED65;
   cursor: pointer;
-}
-.formulario-copia__btn:hover {
-  background-color: #1CED65;
-  border: 2px solid #1CED65;
 }
 
 .alerta {
@@ -1297,50 +1293,44 @@ h3 {
   font-weight: 700;
 }
 .main__btn {
-  background-color: #7F130F;
+  background-color: #ED241C;
   padding: 1.5rem 4rem;
-  color: white;
+  color: #FFFFFF;
   font-size: 1.8rem;
   font-weight: 700;
   border: none;
-  transition-property: background-color, box-shadow;
+  transition-property: background-color, color, border;
   transition-duration: 0.3s;
   text-align: center;
   text-transform: uppercase;
   width: 100%;
   display: inline-block;
   border-radius: 0.5rem;
-  border: 2px solid transparent;
-  transition: border, box-shadow, background-color 0.5s ease;
+  border: 2px solid #ED241C;
+  transition: color, border, background-color 0.5s ease;
 }
 .main__btn:hover {
-  border: 2px solid #7F130F;
-  box-shadow: 0 0 10px #7F130F;
   background-color: transparent;
+  color: #ED241C;
   cursor: pointer;
+}
+.main__btn:hover {
+  color: #ED241C;
 }
 @media (min-width: 768px) {
   .main__btn {
     width: auto;
   }
 }
-.main__btn:hover {
-  background-color: #ED241C;
-  border: 2px solid #ED241C;
-}
 .main__btn--c {
   background-color: #ED241C;
 }
-.main__btn--c:hover {
-  background-color: #7F130F;
-  border: 2px solid #7F130F;
-}
 .main__btn--e {
   background-color: #EDC51C;
+  border-color: #EDC51C;
 }
 .main__btn--e:hover {
-  background-color: #EDC51C;
-  border: 2px solid #EDC51C;
+  color: #EDC51C;
 }
 .main__fi {
   display: flex;

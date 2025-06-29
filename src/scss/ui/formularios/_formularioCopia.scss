@@ -34,12 +34,7 @@
     }
 
     &__btn {
-        @include m.boton(v.$verde, white);
+        @include m.botonDos(v.$verde, white);
         width: auto;
-
-            &:hover {
-                background-color: v.$verde;
-                border: 2px solid v.$verde;
-            }
     }
 }

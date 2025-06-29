@@ -91,10 +91,11 @@
 
         &--c {
             width: 100%;
+            background-color: v.$principal;
+            border-color: v.$principal;
 
             &:hover {
-                background-color: v.$principalDark;
-                border: 2px solid v.$principalDark;
+                color: v.$principal;
             }
         }
     }

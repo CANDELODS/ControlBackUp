@@ -44,32 +44,24 @@
     }
 
     &__btn {
-        @include m.boton(v.$principalDark, white);
+        @include m.botonDos(v.$principal, v.$blanco);
 
+        &:hover{
+                color: v.$principal;
+        }
         @include m.tablet {
             width: auto;
         }
 
-        &:hover {
-            background-color: v.$principal;
-            border: 2px solid v.$principal;
-        }
-
         &--c {
             background-color: v.$principal;
-
-            &:hover {
-                background-color: v.$principalDark;
-                border: 2px solid v.$principalDark;
-            }
         }
 
         &--e {
             background-color: v.$amarillo;
-
-            &:hover {
-                background-color: v.$amarillo;
-                border: 2px solid v.$amarillo;
+            border-color: v.$amarillo;
+            &:hover{
+                color: v.$amarillo;
             }
         }
     }
