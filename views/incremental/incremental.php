@@ -8,7 +8,7 @@
         </div>
         <div class="main__editar">
             <p class="main__editarc">Edita una copia anterior:</p>
-            <a href="#" class="main__btn main__btn--e">Cargar Copia</a>
+            <a href="/copias" class="main__btn main__btn--e">Cargar Copia</a>
         </div>
     </div>
     <form action="" class="formulario-copia" method="post">

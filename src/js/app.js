@@ -40,7 +40,18 @@ function manejarEnvio() {
         });
     });
 }
-
+//Validar dias domingos
+const inputFecha = document.querySelector('.formularioFiltro__date');
+inputFecha.addEventListener('change', function(){
+    //Convertimos el value de inputFecha en un objeto Date para
+    //Poder usar el método getDay()
+    const fechaSeleccionada = new Date(inputFecha.value);
+    const dia = fechaSeleccionada.getDay(); // 6 = Domingo, 0 = Lunes
+        if (dia === 6) {
+        alert('No puedes seleccionar un domingo.');
+        inputFecha.value = ''; // Limpiar el input
+    }
+});
 
 // MENÚ MOBILE
 const abrirMenu = document.querySelector('#abrirMenu');

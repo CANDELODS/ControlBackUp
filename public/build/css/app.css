@@ -631,6 +631,7 @@ h3 {
 .table__tr {
   display: block;
   border-bottom: 1px solid #1a1b15;
+  transition: background-color 0.2s ease-in-out;
 }
 @media (min-width: 768px) {
   .table__tr {
@@ -834,27 +835,22 @@ h3 {
   font-size: 1.8rem;
   font-weight: 700;
   border: none;
-  transition-property: background-color, box-shadow;
+  transition-property: background-color, color, border;
   transition-duration: 0.3s;
   text-align: center;
   text-transform: uppercase;
   width: 100%;
   display: inline-block;
   border-radius: 0.5rem;
-  border: 2px solid transparent;
-  transition: border, box-shadow, background-color 0.5s ease;
+  border: 2px solid #ED241C;
+  transition: color, border, background-color 0.5s ease;
   width: auto;
   font-size: 1.6rem;
 }
 .formulario__submit:hover {
-  border: 2px solid #ED241C;
-  box-shadow: 0 0 10px #ED241C;
   background-color: transparent;
+  color: #ED241C;
   cursor: pointer;
-}
-.formulario__submit:hover {
-  background-color: #7F130F;
-  border: 2px solid #7F130F;
 }
 @media (min-width: 768px) {
   .formulario__submit {
@@ -1005,6 +1001,9 @@ h3 {
 }
 .formulario-copia__textarea {
   resize: none;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 @media (min-width: 768px) {
   .formulario-copia__textarea {
@@ -1033,6 +1032,42 @@ h3 {
   background-color: transparent;
   color: #1CED65;
   cursor: pointer;
+}
+
+.formularioFiltro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+.formularioFiltro__submit {
+  background-color: #BE934F;
+  padding: 1.5rem 4rem;
+  color: #FFFFFF;
+  font-size: 1.8rem;
+  font-weight: 700;
+  border: none;
+  transition-property: background-color, color, border;
+  transition-duration: 0.3s;
+  text-align: center;
+  text-transform: uppercase;
+  width: 100%;
+  display: inline-block;
+  border-radius: 0.5rem;
+  border: 2px solid #BE934F;
+  transition: color, border, background-color 0.5s ease;
+  font-size: 1.4rem;
+  width: auto;
+}
+.formularioFiltro__submit:hover {
+  background-color: transparent;
+  color: #BE934F;
+  cursor: pointer;
+}
+@media (min-width: 768px) {
+  .formularioFiltro__submit {
+    font-size: 1.8rem;
+  }
 }
 
 .alerta {
@@ -1284,6 +1319,20 @@ h3 {
 .main__p {
   margin: 1rem 0 0 0;
 }
+.main__filtros {
+  width: min(95%, 120rem);
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+  gap: 3rem;
+}
+@media (min-width: 768px) {
+  .main__filtros {
+    gap: 0;
+  }
+}
 .main__editar {
   display: flex;
   align-items: center;
@@ -1331,6 +1380,22 @@ h3 {
 }
 .main__btn--e:hover {
   color: #EDC51C;
+}
+.main__btn--bf {
+  background-color: #404040;
+  border-color: #404040;
+  font-size: 1.4rem;
+  width: auto;
+  padding: 1.5rem;
+}
+.main__btn--bf:hover {
+  color: #404040;
+}
+@media (min-width: 768px) {
+  .main__btn--bf {
+    font-size: 1.8rem;
+    padding: 1.5rem 4rem;
+  }
 }
 .main__fi {
   display: flex;

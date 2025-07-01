@@ -149,8 +149,8 @@ class ActiveRecord {
     }
 
     //Paginar Registros
-    public static function paginar($porPagina, $offset){
-        $query = "SELECT * FROM " . static::$tabla . " ORDER BY nombreEquipo ASC LIMIT ${porPagina} OFFSET ${offset} " ;
+    public static function paginar($ordenar, $porPagina, $offset){
+        $query = "SELECT * FROM " . static::$tabla . " ORDER BY ${ordenar} ASC LIMIT ${porPagina} OFFSET ${offset} " ;
         $resultado = self::consultarSQL($query);
         return $resultado;
     }
@@ -161,6 +161,31 @@ class ActiveRecord {
         $resultado = self::consultarSQL($query);
         return array_shift( $resultado ) ;
     }
+
+    // Búsqueda Where con LIKE (ideal para filtros por fecha o texto parcial)
+    public static function whereLike($columna, $valor) {
+        $valor = self::$db->escape_string($valor);
+        $query = "SELECT * FROM " . static::$tabla . " WHERE ${columna} LIKE '%${valor}%'";
+        $resultado = self::consultarSQL($query);
+        return $resultado;
+    }
+
+    // Total de registros filtrados
+    public static function totalWhereLike($columna, $valor) {
+        $valor = self::$db->escape_string($valor);
+        $query = "SELECT COUNT(*) FROM " . static::$tabla . " WHERE ${columna} LIKE '%${valor}%'";
+        $resultado = self::$db->query($query);
+        $total = $resultado->fetch_array();
+        return array_shift($total);
+}
+
+// Búsqueda LIKE con paginación
+    public static function whereLikePaginado($columna, $valor, $ordenar, $porPagina, $offset) {
+        $valor = self::$db->escape_string($valor);
+        $query = "SELECT * FROM " . static::$tabla . " WHERE ${columna} LIKE '%${valor}%' ORDER BY ${ordenar} ASC LIMIT ${porPagina} OFFSET ${offset}";
+        return self::consultarSQL($query);
+}
+
 
     // crea un nuevo registro
     public function crear() {

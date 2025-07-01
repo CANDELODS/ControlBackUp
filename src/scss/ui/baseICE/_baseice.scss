@@ -33,6 +33,18 @@
 
     &__crear {}
 
+    &__filtros{
+        @include m.contenedor;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 3rem;
+        gap: 3rem;
+        @include m.tablet{
+            gap: 0;
+        }
+    }
+
     &__editar {
         display: flex;
         align-items: center;
@@ -47,7 +59,7 @@
         @include m.botonDos(v.$principal, v.$blanco);
 
         &:hover{
-                color: v.$principal;
+            color: v.$principal;
         }
         @include m.tablet {
             width: auto;
@@ -62,6 +74,21 @@
             border-color: v.$amarillo;
             &:hover{
                 color: v.$amarillo;
+            }
+        }
+        //Btn Borrar Filtro (copias.php)
+        &--bf{
+            background-color: v.$gris;
+            border-color: v.$gris;
+            font-size: 1.4rem;
+            width: auto;
+            padding: 1.5rem;
+            &:hover{
+                color: v.$gris;
+            }
+            @include m.tablet{
+                font-size: 1.8rem;
+                padding: 1.5rem 4rem;
             }
         }
     }

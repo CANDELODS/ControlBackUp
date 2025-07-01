@@ -35,7 +35,7 @@ class EquiposController
         //Instanciamos el modelo de equipos
         $equipos = new Equipos;
         // Traemos todos los equipos
-        $equipos = Equipos::paginar($registros_por_pagina, $paginacion->offset());
+        $equipos = Equipos::paginar('nombreEquipo',$registros_por_pagina, $paginacion->offset());
         if($paginacion->totalPaginas() < $pagina_actual){
             header('Location: /equipos?page=1');
         }

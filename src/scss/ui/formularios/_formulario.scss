@@ -44,14 +44,9 @@
     }
 
     &__submit {
-        @include m.boton(v.$principal, v.$blanco);
+        @include m.botonDos(v.$principal, v.$blanco);
         width: auto;
         font-size: 1.6rem;
-
-        &:hover {
-            background-color: v.$principalDark;
-            border: 2px solid v.$principalDark;
-        }
 
         @include m.tablet {
             margin-top: 2rem;

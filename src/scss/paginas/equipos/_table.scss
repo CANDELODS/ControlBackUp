@@ -4,13 +4,15 @@
 .tabla {
     @include m.contenedor-sm;
 
-    &--scroll{
+    &--scroll {
         @extend .tabla;
-        @include m.tablet{
+
+        @include m.tablet {
             overflow-y: scroll;
             height: 40rem;
         }
     }
+
     @include m.tablet {
         @include m.contenedor;
     }
@@ -41,7 +43,7 @@
         //Cambiamos el display a block para que se vea bien en pantallas pequeñas
         display: block;
         border-bottom: 1px solid v.$negro;
-
+        transition: background-color 0.2s ease-in-out;
         @include m.tablet {
             display: table-row;
         }

@@ -6,6 +6,7 @@ use MVC\Router;
 use Controllers\AuthController;
 use Controllers\CompletaController;
 use Controllers\ConsejosController;
+use Controllers\CopiasController;
 use Controllers\EquiposController;
 use Controllers\IncrementalController;
 use Controllers\PrincipalController;
@@ -38,6 +39,11 @@ $router->post('/editar-equipo', [EquiposController::class, 'editar']);
 $router->get('/editar-equipo', [EquiposController::class, 'editar']);
 $router->post('/eliminar-equipo', [EquiposController::class, 'eliminar']);
 
+//Copias
+$router->get('/copias', [CopiasController::class, 'copias']);
+$router->post('/editar-copia', [CopiasController::class, 'editar']);
+$router->get('/editar-copia', [CopiasController::class, 'editar']);
+$router->post('/eliminar-copia', [CopiasController::class, 'eliminar']);
 
 // Consejos
 $router->get('/consejos', [ConsejosController::class, 'consejos']);
