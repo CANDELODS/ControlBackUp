@@ -11,9 +11,10 @@
     </div>
 
     <main>
-
+<!-- Es el mismo formulario que usamos para crear, pero su action es diferente -->
 <!--Quitamos el action del formulario para que no nos borre el parámetro id en la URL-->
         <form method="post" class="eformulario">
+        <!-- Importamos las alertas -->
         <?php
         require_once __DIR__ . '/../templates/alertas.php';
         ?>

@@ -11,6 +11,7 @@
         </div>
     </div>
     <div class="tabla">
+        <!-- Verifficamos si hay equipos para mostrar -->
         <?php if (!empty($equipos)) { ?>
             <table class="table">
                 <thead class="table__thead">
@@ -23,23 +24,31 @@
                     </tr>
                 </thead>
                 <tbody class="table__tbody">
+                    <!-- Iteramos equipo por equipo -->
                     <?php foreach ($equipos as $equipo) { ?>
                         <tr class="table__tr">
                             <td data-label="Nombre" class="table__td">
+                                <!-- Mostramos el nombre de cada equipo -->
                                 <?php echo $equipo->nombreEquipo; ?>
                             </td>
                             <td data-label="Área" class="table__td">
+                                <!-- Mostramos el área de cada equipo -->
                                 <?php echo $equipo->idAreas->nombreArea; ?>
                             </td>
                             <td data-label="Local" class="table__td">
+                                <!-- Mostramos si el equipo hace copia local -->
                                 <?php echo $equipo->local; ?>
                             </td>
                             <td data-label="Nube" class="table__td">
+                                <!-- Mostramos si el equipo hace copia en nube -->
                                 <?php echo $equipo->nube; ?>
                             </td>
                             <td class="table__td--acciones">
+                                <!-- Enlace para redirigir al usuario a la vista de editar-equipo, además se manda el id del equipo a editar
+                                 por medio de la URL -->
                                 <a class="table__accion table__accion--editar" href="editar-equipo?id=<?php echo $equipo->id;?>">Editar</a>
-
+                                <!-- Botón para eliminar un equipo, además tiene un input de tipo hidden el cual manda el id del equipo
+                                 al servidor y así poder eliminar el equipo -->
                                 <form method="post" action="eliminar-equipo" class="table__form">
                                     <input type="hidden" name="id" value="<?php echo $equipo->id; ?>">
                                     <button class="table__accion table__accion--eliminar" type="submit">
@@ -48,13 +57,14 @@
                                 </form>
                             </td>
                         </tr>
-                    <?php } ?>
+                    <?php } ?> <!--Fin foreach($equipos as $equipo)-->
                 </tbody>
             </table>
-        <?php } else { ?>
+        <?php } else { ?> 
             <p class="text-center">No Hay Equipos Para Listar</p>
-        <?php } ?>
+        <?php } ?> <!--Fin if(!empty($equipos))-->
     </div>
+<!-- Mostramos los enlaces de la paginación -->
 <?php
     echo $paginacion;
 ?>

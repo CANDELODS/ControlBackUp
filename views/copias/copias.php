@@ -27,6 +27,7 @@
     </div>
 
     <div class="tabla">
+        <!-- Verifficamos si hay copias para mostrar -->
         <?php if (!empty($copias)) { ?>
             <table class="table">
                 <thead class="table__thead">
@@ -37,17 +38,23 @@
                     </tr>
                 </thead>
                 <tbody class="table__tbody">
+                    <!-- Iteramos copia por copia -->
                     <?php foreach ($copias as $copia) { ?>
                         <tr class="table__tr">
                             <td data-label="Fecha" class="table__td">
+                                 <!-- Mostramos la fecha de cada copia -->
                                 <?php echo $copia->fecha; ?>
                             </td>
                             <td data-label="Tipo De Copia" class="table__td">
+                                 <!-- Mostramos el tiopoDeCopia de cada copia -->
                                 <?php echo $copia->tipoDeCopia; ?>
                             </td>
                             <td class="table__td--acciones">
+                                 <!-- Enlace para redirigir al usuario a la vista de editar-equipo, además se manda el id del equipo a editar
+                                 por medio de la URL -->
                                 <a class="table__accion table__accion--editar" href="editar-copia?id=<?php echo $copia->id; ?>">Editar</a>
-
+                                 <!-- Botón para eliminar un equipo, además tiene un input de tipo hidden el cual manda el id del equipo
+                                 al servidor y así poder eliminar el equipo -->
                                 <form method="post" action="eliminar-copia" class="table__form">
                                     <input type="hidden" name="id" value="<?php echo $copia->id; ?>">
                                     <button class="table__accion table__accion--eliminar" type="submit">
@@ -56,7 +63,7 @@
                                 </form>
                             </td>
                         </tr>
-                    <?php } ?>
+                    <?php } ?> <!--Fin foreach($equipos as $equipo)-->
                 </tbody>
             </table>
         <?php } else { ?>
@@ -67,8 +74,9 @@
                 <?php } else { ?>
             <p class="text-center">No Hay Copias Para Listar</p>
             <?php } ?>
-        <?php } ?>
+        <?php } ?><!--Fin if(!empty($equipos))-->
     </div>
+    <!-- Mostramos los enlaces de la paginación -->
     <?php
     echo $paginacion;
     ?>

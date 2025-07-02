@@ -12,7 +12,9 @@
 
     <main>
     
+        <!-- Es el mismo formulario que usamos para editar, pero su action es diferente -->
         <form method="post" action="/crear-equipo" class="eformulario">
+        <!-- Importación de alertas -->
         <?php
         require_once __DIR__ . '/../templates/alertas.php';
         ?>

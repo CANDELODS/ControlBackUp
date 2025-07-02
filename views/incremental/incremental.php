@@ -13,6 +13,7 @@
     </div>
     <form action="" class="formulario-copia" method="post">
         <div class="tabla--scroll">
+            <!-- Verifficamos si hay equipos para mostrar -->
             <?php if (!empty($equipos)) { ?>
                 <table class="table">
                     <thead class="table__thead">
@@ -25,17 +26,23 @@
                         </tr>
                     </thead>
                     <tbody class="table__tbody">
+                        <!-- Iteramos equipo por equipo -->
                         <?php foreach ($equipos as $equipo) { ?>
                             <tr class="table__tr">
                                 <td data-label="Nombre" class="table__td">
+                                    <!-- Mostramos el nombre de cada equipo y creamos un arreglo con sus ids y lo llenamos con sus values -->
                                     <input type="hidden" name="idEquipos[]" value="<?php echo $equipo->id; ?>">
                                     <?php echo $equipo->nombreEquipo; ?>
                                 </td>
                                 <td data-label="Área" class="table__td">
+                                     <!-- Mostramos el área de cada equipo -->
                                     <?php echo $equipo->idAreas->nombreArea; ?>
                                 </td>
                                 <td data-label="Local" class="table__td">
-                                    <!-- Si el equipo NO hace copia local -->
+                                    <!-- Si el equipo NO hace copia local entonces deshabilitamos el checkbox, creamos el
+                                     arreglo copiaLocal y lo llenamos con su value que en este caso el 0 representa un NO,
+                                     De lo contrario, habilitamos el checkbox y cuando el usuario le haga click cambiamos
+                                     su value de 0 (No) a 1 (Si) -->
                                     <?php if ($equipo->local === '0') : ?>
                                         <input type="hidden" name="copiaLocal[]" value="0">
                                         <input type="checkbox" class="formulario-copia__input--check checkboxes" disabled>
@@ -47,7 +54,10 @@
                                     <?php endif; ?>
                                 </td>
                                 <td data-label="Nube" class="table__td">
-                                    <!-- Si el equipo NO hace copia en nube -->
+                                    <!-- Si el equipo NO hace copia en nube entonces deshabilitamos el checkbox, creamos el
+                                     arreglo copiaNube y lo llenamos con su value que en este caso el 0 representa un NO,
+                                     De lo contrario, habilitamos el checkbox y cuando el usuario le haga click cambiamos
+                                     su value de 0 (No) a 1 (Si) -->
                                     <?php if ($equipo->nube === '0') : ?>
                                         <input type="hidden" name="copiaNube[]" value="0">
                                         <input type="checkbox" class="formulario-copia__input--check checkboxes" disabled>
@@ -59,21 +69,23 @@
                                     <?php endif; ?>
                                 </td>
                                 <td class="table__td">
+                                    <!-- Creamos el arreglo de observaciones el cual se llenará con el texto digitado por el usuario -->
                                     <textarea name="observaciones[]" class="formulario-copia__textarea"
                                         placeholder="Escribe Aquí Las Observaciones"></textarea>
                                 </td>
                             </tr>
-                        <?php } ?>
+                        <?php } ?> <!--Fin foreach($equipos as $equipo)-->
                     </tbody>
                 </table>
-            <?php } else { ?>
+            <?php } else { ?> 
                 <p class="text-center">No Hay Equipos Para Listar</p>
-            <?php } ?>
+            <?php } ?> <!--Fin if(!empty($equipos))-->
         </div>
         <div class="main__fi">
+            <!-- Mostramos la fecha del día actual -->
             <p class="main__f"><?php echo date('Y-m-d');?></p>
             <input type="submit" class="formulario-copia__btn" value="Guardar">
         </div>
     </form>
-
+<!-- No necesitamos paginación en este archivo ya que estamos usando un scroll en la tabla -->
 </main>

@@ -1,9 +1,10 @@
 <main class="auth">
     <div class="auth__contenedor">
+        <!-- Importamos las alertas -->
     <?php
         require_once __DIR__ . '/../templates/alertas.php';
     ?>
-        
+        <!-- Formulario con método post el cual manejamos en esta misma URL (/) -->
         <form method="post" action="/" class="formulario">
             <picture>
                 <source srcset="build/img/logo.avif" type="image/avif">
