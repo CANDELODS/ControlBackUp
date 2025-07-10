@@ -11,7 +11,7 @@
         </div>
     </div>
     <div class="tabla">
-        <!-- Verifficamos si hay equipos para mostrar -->
+        <!-- Verificamos si hay equipos para mostrar -->
         <?php if (!empty($equipos)) { ?>
             <table class="table">
                 <thead class="table__thead">

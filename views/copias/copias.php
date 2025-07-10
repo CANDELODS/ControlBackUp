@@ -63,7 +63,7 @@
                                 </form>
                             </td>
                         </tr>
-                    <?php } ?> <!--Fin foreach($equipos as $equipo)-->
+                    <?php } ?> <!--Fin foreach($copias as $copia)-->
                 </tbody>
             </table>
         <?php } else { ?>
@@ -74,7 +74,7 @@
                 <?php } else { ?>
             <p class="text-center">No Hay Copias Para Listar</p>
             <?php } ?>
-        <?php } ?><!--Fin if(!empty($equipos))-->
+        <?php } ?><!--Fin if(!empty($copias))-->
     </div>
     <!-- Mostramos los enlaces de la paginación -->
     <?php

@@ -56,6 +56,7 @@
     }
 
     &__btn {
+        //main_btn (Botón Regresar) (Editar.php, crear.php, Cargar/ Editar Copia)
         @include m.botonDos(v.$principal, v.$blanco);
 
         &:hover{
@@ -64,11 +65,11 @@
         @include m.tablet {
             width: auto;
         }
-
+        //Btn Crear Equipo (equipo.php)
         &--c {
             background-color: v.$principal;
         }
-
+        //Btn Editar /Cargar Copia (incremental.php)
         &--e {
             background-color: v.$amarillo;
             border-color: v.$amarillo;

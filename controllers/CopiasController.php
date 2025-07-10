@@ -3,6 +3,8 @@
 namespace Controllers;
 
 use Classes\Paginacion;
+use Model\Areas;
+use Model\CopiasDetalle;
 use Model\CopiasEncabezado;
 use Model\Equipos;
 use Model\Usuario;
@@ -67,101 +69,70 @@ class CopiasController
             //Si hay algo (Por ejemplo 1) será incremental, de lo contrario (0) será completa
             $copia->tipoDeCopia = $copia->tipoDeCopia ? 'Incremental' : 'Completa';
         }
+        $copiasDetalle = new CopiasDetalle;
+        $copiasDetalle = CopiasDetalle::all();
         //Renderizamos la vista y mandamos las variables
         $router->render('copias/copias', [
             'titulo' => 'Copias',
             'alertas' => Usuario::getAlertas(),
             'copias' => $copias,
+            'copiasDetalle' => $copiasDetalle,
             'paginacion' => $paginacion->paginacion(),
             'sin_resultados' => $sin_resultados
         ]);
     }
 
+public static function editar(Router $router)
+{
+    if (!isAuth()) {
+        header('Location: /login');
+        exit;
+    }
 
+    // Validar y obtener el ID de la copia a editar
+    $id = $_GET['id'] ?? null;
+    $id = filter_var($id, FILTER_VALIDATE_INT);
 
-    // public static function crear(Router $router)
-    // {
-    //     if (!isAuth()) {
-    //         header('Location: /login');
-    //     }
-    //     $alertas = [];
-    //     //Instanciamos las áreas
-    //     $areas = new Areas;
-    //     //Obtenemos todas las áreas
-    //     //Esto nos permite tener un listado de áreas para seleccionar al crear un equipo
-    //     $areas = Areas::allA('ASC');
-    //     $equipos = new Equipos;
+    if (!$id) {
+        header('Location: /copias');
+        exit;
+    }
 
-    //     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    //         // Sincronizamos los datos obtenido del formulario con los del modelo de equipos
-    //         $equipos->sincronizar($_POST);
-    //         // Validar los datos
-    //         $alertas = $equipos->validar();
-    //         //Si no hay alertas, guardar el equipo
-    //         if (empty($alertas)) {
-    //             $resultado = $equipos->guardar();
-    //             if ($resultado) {
-    //                 header('Location: /equipos');
-    //             }
-    //         }
-    //     }
+    // Buscar la copiaEncabezado
+    $copia = CopiasEncabezado::find($id);
+    if (!$copia) {
+        header('Location: /copias');
+        exit;
+    }
 
-    //     // Renderizamos la vista y enviamos las variables a la vista
-    //     $router->render('equipos/crear', [
-    //         'titulo' => 'Crear Equipo',
-    //         'alertas' => $alertas,
-    //         'equipos' => $equipos,
-    //         'areas' => $areas
-    //     ]);
-    // }
+    // Obtener detalles asociados a esta copia
+    $copiasDetalle = CopiasDetalle::where('idCopiasEncabezado', $id);
 
-    // public static function editar(Router $router)
-    // {
-    //     if (!isAuth()) {
-    //         header('Location: /login');
-    //     }
-    //     $alertas = [];
-    //     $areas = new Areas;
-    //     $areas = Areas::allA('ASC');
-    //     //Obtenemos el id del equipo a editar
-    //     $id = $_GET['id'];
-    //     //Validamos que el id sea un número
-    //     $id = filter_var($id, FILTER_VALIDATE_INT);
-    //     //Si el id no es un número, redirigimos a la lista de equipos
-    //     if (!$id) {
-    //         header('Location: /equipos');
-    //     }
-    //     //obtener el equipo a editar
-    //     $equipos = Equipos::find($id);
-    //     //Si no existe el equipo, redirigimos a la lista de equipos
-    //     if (!$equipos) {
-    //         header('Location: /equipos');
-    //     }
-    //     //Cruzar información de áreas
-    //     //No usamos un foreach ya que solo estamos editando un equipo
-    //     $equipos->idAreas = Areas::find($equipos->idAreas);
+    // Obtener todos los equipos
+    $equipos = Equipos::all('ASC');
 
-    //     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    //         // Sincronizamos los datos obtenido del formulario con los del modelo de equipos
-    //         $equipos->sincronizar($_POST);
-    //         // Validar los datos
-    //         $alertas = $equipos->validar();
-    //         //Si no hay alertas, guardar el equipo
-    //         if (empty($alertas)) {
-    //             $resultado = $equipos->guardar();
-    //             if ($resultado) {
-    //                 header('Location: /equipos');
-    //             }
-    //         }
-    //     }
-    //     // Renderizamos la vista y enviamos las variables a la vista
-    //     $router->render('equipos/editar', [
-    //         'titulo' => 'Editar Equipo',
-    //         'alertas' => $alertas,
-    //         'equipos' => $equipos,
-    //         'areas' => $areas
-    //     ]);
-    // }
+    // Obtener todas las áreas
+    $areas = Areas::all();
+
+    // Enriquecer equipos con sus áreas (para mostrar nombre en la vista)
+    foreach ($equipos as $equipo) {
+        $equipo->idAreas = Areas::find($equipo->idAreas);
+    }
+
+    // Preparar alertas si se desea usar más adelante
+    $alertas = [];
+
+    // Renderizar la vista
+    $router->render('copias/editar', [
+        'titulo' => 'Editar Copia',
+        'alertas' => $alertas,
+        'equipos' => $equipos,
+        'areas' => $areas,
+        'copiasDetalle' => $copiasDetalle,
+        'copia' => $copia
+    ]);
+}
+
 
     // public static function eliminar(Router $router)
     // {
