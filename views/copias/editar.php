@@ -6,6 +6,9 @@
             <p class="main__p">Una copia de seguridad incremental solo copia los datos<br>
                 modificados desde la última copia de seguridad.</p>
         </div>
+        <div class="main__crear">
+            <a href="/copias" class="main__btn main__btn--c">Regresar</a>
+        </div>
     </div>
     <form action="" class="formulario-copia" method="post">
         <div class="tabla--scroll">
@@ -49,9 +52,9 @@
                                             value="0"
                                             <?php if ($equipo->local === '1') { ?>
                                             checked>
-                                            <?php } else { ?>
-                                                    >
-                                            <?php } ?>
+                                    <?php } else { ?>
+                                        >
+                                    <?php } ?>
                                 <?php endif; ?>
                                 </td>
                                 <td data-label="Nube" class="table__td">
@@ -67,17 +70,25 @@
                                             class="formulario-copia__input--check checkboxes copia-nube"
                                             name="copiaNube[]"
                                             value="0"
-                                             <?php if ($equipo->nube === '1') { ?>
+                                            <?php if ($equipo->nube === '1') { ?>
                                             checked>
-                                            <?php } else { ?>
-                                                    >
-                                            <?php } ?>
-                                    <?php endif; ?>
+                                    <?php } else { ?>
+                                        >
+                                    <?php } ?>
+                                <?php endif; ?>
                                 </td>
                                 <td class="table__td">
-                                    <!-- Creamos el arreglo de observaciones el cual se llenará con el texto digitado por el usuario -->
+                                    <?php
+                                    $observacion = '';
+                                    foreach ($copiasDetalle as $detalle) {
+                                        if (isset($detalle->idEquipos) && $detalle->idEquipos == $equipo->id) {
+                                            $observacion = $detalle->observaciones ?? '';
+                                            break;
+                                        }
+                                    }
+                                    ?>
                                     <textarea name="observaciones[]" class="formulario-copia__textarea"
-                                        placeholder="Escribe Aquí Las Observaciones"></textarea>
+                                        placeholder="Escribe Aquí Las Observaciones"><?php echo htmlspecialchars($observacion); ?></textarea>
                                 </td>
                             </tr>
                         <?php } ?> <!--Fin foreach($equipos as $equipo)-->

@@ -104,10 +104,12 @@ public static function editar(Router $router)
         header('Location: /copias');
         exit;
     }
-
+    
     // Obtener detalles asociados a esta copia
-    $copiasDetalle = CopiasDetalle::where('idCopiasEncabezado', $id);
-
+    //Usamo la función whereSAS (SAS = Sin Array_Shift) para poder traer
+    //Todas las copiasDetalles asociadas a la copiaEncabezado
+    //Usamos este where ya que si usamos el que tiene array shift nos traería un solo resultado
+    $copiasDetalle = CopiasDetalle::whereSAS('idCopiasEncabezado', $id);
     // Obtener todos los equipos
     $equipos = Equipos::all('ASC');
 

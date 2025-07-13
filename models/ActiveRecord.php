@@ -162,6 +162,13 @@ class ActiveRecord {
         return array_shift( $resultado ) ;
     }
 
+    // Busqueda Where con Columna sin array_shift 
+    public static function whereSAS($columna, $valor) {
+        $query = "SELECT * FROM " . static::$tabla . " WHERE ${columna} = '${valor}'";
+        $resultado = self::consultarSQL($query);
+        return $resultado ;
+    }
+
     // Búsqueda Where con LIKE (ideal para filtros por fecha o texto parcial)
     public static function whereLike($columna, $valor) {
         $valor = self::$db->escape_string($valor);

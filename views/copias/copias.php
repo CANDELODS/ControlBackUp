@@ -50,7 +50,7 @@
                                 <?php echo $copia->tipoDeCopia; ?>
                             </td>
                             <td class="table__td--acciones">
-                                 <!-- Enlace para redirigir al usuario a la vista de editar-equipo, además se manda el id del equipo a editar
+                                 <!-- Enlace para redirigir al usuario a la vista de editar-copia, además se manda el id de la copiaEncabezao a editar
                                  por medio de la URL -->
                                 <a class="table__accion table__accion--editar" href="editar-copia?id=<?php echo $copia->id; ?>">Editar</a>
                                  <!-- Botón para eliminar un equipo, además tiene un input de tipo hidden el cual manda el id del equipo
