@@ -46,11 +46,23 @@
                                         <input type="hidden" name="copiaLocal[]" value="0">
                                         <input type="checkbox" class="formulario-copia__input--check checkboxes" disabled>
                                     <?php else : ?>
+                                        <!-- Creamos la variable local, iteramos las copiasDetalle, verificamos si está definido (Isset) y si es el equipo que estamos
+                                         editando actualmente, pasamos el valor de la llave copiaLocal a la variable $local, y cambiamos el estado del
+                                         input Type Checkbox dependiendo del valor (1 = si / checked: 0 = no / >) -->
+                                        <?php
+                                        $local = '';
+                                        foreach ($copiasDetalle as $detalle) {
+                                            if (isset($detalle->idEquipos) && $detalle->idEquipos == $equipo->id) {
+                                                $local = $detalle->copiaLocal ?? '';
+                                                break;
+                                            }
+                                        }
+                                        ?>
                                         <input type="checkbox"
                                             class="formulario-copia__input--check checkboxes copia-local"
                                             name="copiaLocal[]"
                                             value="0"
-                                            <?php if ($equipo->local === '1') { ?>
+                                            <?php if ($local === '1') { ?>
                                             checked>
                                     <?php } else { ?>
                                         >
@@ -66,11 +78,23 @@
                                         <input type="hidden" name="copiaNube[]" value="0">
                                         <input type="checkbox" class="formulario-copia__input--check checkboxes" disabled>
                                     <?php else : ?>
+                                        <!-- Creamos la variable nube, iteramos las copiasDetalle, verificamos si está definido (Isset) y si es el equipo que estamos
+                                         editando actualmente, pasamos el valor de la llave copiaNube a la variable $nube, y cambiamos el estado del
+                                         input Type Checkbox dependiendo del valor (1 = si / checked: 0 = no / >) -->
+                                        <?php
+                                        $nube = '';
+                                        foreach ($copiasDetalle as $detalle) {
+                                            if (isset($detalle->idEquipos) && $detalle->idEquipos == $equipo->id) {
+                                                $nube = $detalle->copiaNube ?? '';
+                                                break;
+                                            }
+                                        }
+                                        ?>
                                         <input type="checkbox"
                                             class="formulario-copia__input--check checkboxes copia-nube"
                                             name="copiaNube[]"
                                             value="0"
-                                            <?php if ($equipo->nube === '1') { ?>
+                                            <?php if ($nube === '1') { ?>
                                             checked>
                                     <?php } else { ?>
                                         >

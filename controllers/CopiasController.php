@@ -82,76 +82,107 @@ class CopiasController
         ]);
     }
 
-public static function editar(Router $router)
-{
-    if (!isAuth()) {
-        header('Location: /login');
-        exit;
+    public static function editar(Router $router)
+    {
+        if (!isAuth()) {
+            header('Location: /login');
+            exit;
+        }
+
+        // Validar y obtener el ID de la copia a editar
+        $id = $_GET['id'] ?? null;
+        $id = filter_var($id, FILTER_VALIDATE_INT);
+
+        if (!$id) {
+            header('Location: /copias');
+            exit;
+        }
+
+        // Buscar la copiaEncabezado
+        $copia = CopiasEncabezado::find($id);
+        if (!$copia) {
+            header('Location: /copias');
+            exit;
+        }
+
+        // Obtener detalles asociados a esta copia
+        //Usamo la función whereSAS (SAS = Sin Array_Shift) para poder traer
+        //Todas las copiasDetalles asociadas a la copiaEncabezado
+        //Usamos este where ya que si usamos el que tiene array shift nos traería un solo resultado
+        $copiasDetalle = CopiasDetalle::whereSAS('idCopiasEncabezado', $id);
+        // Obtener todos los equipos
+        $equipos = Equipos::all('ASC');
+
+        // Obtener todas las áreas
+        $areas = Areas::all();
+
+        // Enriquecer equipos con sus áreas (para mostrar nombre en la vista)
+        foreach ($equipos as $equipo) {
+            $equipo->idAreas = Areas::find($equipo->idAreas);
+        }
+
+        // Preparar alertas si se desea usar más adelante
+        $alertas = [];
+
+        // Procesar el formulario si se envía
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // 1. Recibimos los datos del formulario como arrays
+            $idsEquipos = $_POST['idEquipos'] ?? [];
+            $copiasLocal = $_POST['copiaLocal'] ?? [];
+            $copiasNube = $_POST['copiaNube'] ?? [];
+            $observaciones = $_POST['observaciones'] ?? [];
+            // 2. Recorremos cada equipo recibido
+            foreach ($idsEquipos as $i => $idEquipo) {
+                // 3. Buscamos el registro existente en copiasDetalle
+                $detalleExistente = CopiasDetalle::where2([
+                    'idCopiasEncabezado' => $id,
+                    'idEquipos' => $idEquipo
+                ]);
+                // 4. Si el registro existe, lo actualizamos
+                if ($detalleExistente) {
+                    // Actualizar los valores
+                    $detalleExistente->copiaLocal = $copiasLocal[$i] ?? '0';
+                    $detalleExistente->copiaNube = $copiasNube[$i] ?? '0';
+                    $detalleExistente->observaciones = $observaciones[$i] ?? '';
+
+                    // Guardar los cambios
+                    $detalleExistente->guardar();
+                }
+            }
+
+            //Redireccionar al usuario
+            header('Location: /copias');
+        }
+
+
+        // Renderizar la vista
+        $router->render('copias/editar', [
+            'titulo' => 'Editar Copia',
+            'alertas' => $alertas,
+            'equipos' => $equipos,
+            'areas' => $areas,
+            'copiasDetalle' => $copiasDetalle,
+            'copia' => $copia
+        ]);
     }
 
-    // Validar y obtener el ID de la copia a editar
-    $id = $_GET['id'] ?? null;
-    $id = filter_var($id, FILTER_VALIDATE_INT);
 
-    if (!$id) {
-        header('Location: /copias');
-        exit;
+    public static function eliminar(Router $router)
+    {
+        if (!isAuth()) {
+            header('Location: /login');
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = $_POST['id'];
+            //Buscamos el objeto del equipo a eliminar por medio del id
+            $copias = CopiasEncabezado::find($id);
+            if (empty($copias)) {
+                header('Location: /copias');
+            }
+            $resultado = $copias->eliminar();
+            if ($resultado) {
+                header('Location: /copias');
+            }
+        }
     }
-
-    // Buscar la copiaEncabezado
-    $copia = CopiasEncabezado::find($id);
-    if (!$copia) {
-        header('Location: /copias');
-        exit;
-    }
-    
-    // Obtener detalles asociados a esta copia
-    //Usamo la función whereSAS (SAS = Sin Array_Shift) para poder traer
-    //Todas las copiasDetalles asociadas a la copiaEncabezado
-    //Usamos este where ya que si usamos el que tiene array shift nos traería un solo resultado
-    $copiasDetalle = CopiasDetalle::whereSAS('idCopiasEncabezado', $id);
-    // Obtener todos los equipos
-    $equipos = Equipos::all('ASC');
-
-    // Obtener todas las áreas
-    $areas = Areas::all();
-
-    // Enriquecer equipos con sus áreas (para mostrar nombre en la vista)
-    foreach ($equipos as $equipo) {
-        $equipo->idAreas = Areas::find($equipo->idAreas);
-    }
-
-    // Preparar alertas si se desea usar más adelante
-    $alertas = [];
-
-    // Renderizar la vista
-    $router->render('copias/editar', [
-        'titulo' => 'Editar Copia',
-        'alertas' => $alertas,
-        'equipos' => $equipos,
-        'areas' => $areas,
-        'copiasDetalle' => $copiasDetalle,
-        'copia' => $copia
-    ]);
-}
-
-
-    // public static function eliminar(Router $router)
-    // {
-    //     if (!isAuth()) {
-    //         header('Location: /login');
-    //     }
-    //     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    //         $id = $_POST['id'];
-    //         //Buscamos el objeto del equipo a eliminar por medio del id
-    //         $equipos = Equipos::find($id);
-    //         if (empty($equipos)) {
-    //             header('Location: /equipos');
-    //         }
-    //         $resultado = $equipos->eliminar();
-    //         if ($resultado) {
-    //             header('Location: /equipos');
-    //         }
-    //     }
-    // }
 }
