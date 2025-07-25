@@ -11,7 +11,7 @@
                 Nuevamente.</p>
         </div>
         <div class="main__crear">
-            <a href="/incremental" class="main__btn main__btn--c">Regresar</a>
+            <a href="/principal" class="main__btn main__btn--c">Regresar</a>
         </div>
     </div>
 <!--Este formulario nos permitirá filtrar las copias, mandamos las fechas por la URL y la obtenemos en el CopiasController.php-->
