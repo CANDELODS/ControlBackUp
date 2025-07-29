@@ -92,6 +92,24 @@
                 padding: 1.5rem 4rem;
             }
         }
+        //Btn Descargar Informes Diarios (Incremental.php)
+        &--d{
+            background-color: v.$cafe;
+            border-color: v.$cafe;
+            width: auto;
+            &:hover{
+                color: v.$cafe;
+            }
+        }
+        //Btn Descargar Informes Mensuales (Incremental.php)
+        &--m{
+            background-color: v.$amarilloLight;
+            border-color: v.$amarilloLight;
+            width: auto;
+            &:hover{
+                color: v.$amarilloLight;
+            }
+        }
     }
 
     &__fi{
@@ -101,6 +119,26 @@
     }
 
     &__f{
+        // font-weight: v.$bold;
+    }
+
+    &__h6{
         font-weight: v.$bold;
+        font-size: 1.9rem;
+    }
+
+    &__descargarI{
+        @include m.contenedor;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        margin-top: 2rem;
+        align-items: center;
+
+        @include m.tablet{
+            flex-direction: row;
+            gap: 2rem;
+            margin-top: 0;
+        }
     }
 }

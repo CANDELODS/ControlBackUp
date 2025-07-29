@@ -88,4 +88,9 @@
         </div>
     </form>
 <!-- No necesitamos paginación en este archivo ya que estamos usando un scroll en la tabla -->
+    <div class="main__descargarI">
+        <h6 class="main__h6">Descargar Informes</h6>
+        <a href="/incremental-descargar-diaria" class="main__btn main__btn--d">Diaria</a>
+        <a href="/incremental-descargar-mensual" class="main__btn main__btn--m">Mensual</a>
+    </div>
 </main>

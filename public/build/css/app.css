@@ -1397,12 +1397,45 @@ h3 {
     padding: 1.5rem 4rem;
   }
 }
+.main__btn--d {
+  background-color: #BE934F;
+  border-color: #BE934F;
+  width: auto;
+}
+.main__btn--d:hover {
+  color: #BE934F;
+}
+.main__btn--m {
+  background-color: #EEFF00;
+  border-color: #EEFF00;
+  width: auto;
+}
+.main__btn--m:hover {
+  color: #EEFF00;
+}
 .main__fi {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.main__f {
+.main__h6 {
   font-weight: 700;
+  font-size: 1.9rem;
+}
+.main__descargarI {
+  width: min(95%, 120rem);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-top: 2rem;
+  align-items: center;
+}
+@media (min-width: 768px) {
+  .main__descargarI {
+    flex-direction: row;
+    gap: 2rem;
+    margin-top: 0;
+  }
 }
 /*# sourceMappingURL=app.css.map */

@@ -9,6 +9,7 @@ use Controllers\ConsejosController;
 use Controllers\CopiasController;
 use Controllers\EquiposController;
 use Controllers\IncrementalController;
+use Controllers\IncrementalInformesController;
 use Controllers\PrincipalController;
 
 $router = new Router();
@@ -26,6 +27,10 @@ $router->get('/principal', [PrincipalController::class, 'principal']);
 // Incremental
 $router->get('/incremental', [IncrementalController::class, 'incremental']);
 $router->post('/incremental', [IncrementalController::class, 'incremental']);
+
+//Incremental Informes
+$router->get('/incremental-descargar-diaria', [IncrementalInformesController::class, 'get']);
+
 
 // Completa
 $router->get('/completa', [CompletaController::class, 'completa']);
