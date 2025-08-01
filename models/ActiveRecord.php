@@ -151,6 +151,17 @@ class ActiveRecord
         return array_shift($total);
     }
 
+    //Traer el total de registros dependiendo de UNA SOLA condicion
+    public static function totalWhere($columna, $valor)
+    {
+        $query = "SELECT COUNT(*) FROM " . static::$tabla . " WHERE ${columna} = ${valor}";
+        //No usamos consultarSQL ya que no queremos crear un objeto del modelo
+        $resultado = self::$db->query($query);
+        $total = $resultado->fetch_array();
+        //Con array_shift extraemos el primer registro del arreglo
+        return array_shift($total);
+    }
+
     //Obtener el último ID insertado
     public static function ultimoId()
     {
@@ -171,6 +182,14 @@ class ActiveRecord
     public static function paginar($ordenar, $porPagina, $offset)
     {
         $query = "SELECT * FROM " . static::$tabla . " ORDER BY ${ordenar} ASC LIMIT ${porPagina} OFFSET ${offset} ";
+        $resultado = self::consultarSQL($query);
+        return $resultado;
+    }
+
+    //Paginar Registros con una condición
+    public static function paginarWhere($columna, $valor, $ordenar, $porPagina, $offset)
+    {
+        $query = "SELECT * FROM " . static::$tabla . " WHERE ${columna} = ${valor} ORDER BY ${ordenar} ASC LIMIT ${porPagina} OFFSET ${offset} ";
         $resultado = self::consultarSQL($query);
         return $resultado;
     }
@@ -226,6 +245,16 @@ class ActiveRecord
     {
         $valor = self::$db->escape_string($valor);
         $query = "SELECT COUNT(*) FROM " . static::$tabla . " WHERE ${columna} LIKE '%${valor}%'";
+        $resultado = self::$db->query($query);
+        $total = $resultado->fetch_array();
+        return array_shift($total);
+    }
+
+    //Total de registros filtrados dependiendo del tipo de copia
+        public static function totalWhereLike3($columna, $valor, $copia)
+    {
+        $valor = self::$db->escape_string($valor);
+        $query = "SELECT COUNT(*) FROM " . static::$tabla . " WHERE ${columna} LIKE '%${valor}%' AND tipoDeCopia =${copia}";
         $resultado = self::$db->query($query);
         $total = $resultado->fetch_array();
         return array_shift($total);

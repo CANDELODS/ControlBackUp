@@ -21,7 +21,7 @@ class IncrementalInformesController
         //Veriricamos que sea un número y que sea positivo
         $pagina_actual = filter_var($pagina_actual, FILTER_VALIDATE_INT);
         if (!$pagina_actual || $pagina_actual < 1) {
-            header('Location: /copias?page=1');
+            header('Location: /incremental-descargar-diaria?page=1');
         }
         //Cantidad de registros que queremos mostraren la vista
         $registros_por_pagina = 8;
@@ -30,18 +30,18 @@ class IncrementalInformesController
 
         //Si se filtra por fecha (Input Type Date) entonce:
         if ($fecha) {
-            //Contamos el total de registros filtrados (Where (tabla) like (fecha))
-            $total_registros = CopiasEncabezado::totalWhereLike('fecha', $fecha);
+            //Contamos el total de registros filtrados (Where (tabla) like (fecha) AND tipoDeCopia (1))
+            $total_registros = CopiasEncabezado::totalWhereLike3('fecha', $fecha, 1);
             //Si no hay resultados entonces:
             if (!$total_registros) {
                 //Cambiamos el valor de la variable para mostrar una alerta en la vista
                 $sin_resultados = true;
-                //Contamos el total de registros (Sin filtro)
-                $total_registros = CopiasEncabezado::total();
+                //Contamos el total de registros dependiendo del tipo de copia (Where (tabla) = (valor)) (Sin filtro de fecha)
+                $total_registros = CopiasEncabezado::totalWhere('tipoDeCopia', 1);
                 //Instanciamos la paginación con sus respectivos parámetros
                 $paginacion = new Paginacion($pagina_actual, $registros_por_pagina, $total_registros);
-                //Ordenamos y páginamos los registros
-                $copias = CopiasEncabezado::paginar('fecha', $registros_por_pagina, $paginacion->offset());
+                //Ordenamos y páginamos los registros dependiendo del tipo de copia (Where (tabla) = (valor) ORDER BY (columna) ASC LIMIT (porPagina) OFFSET (offset))
+                $copias = CopiasEncabezado::paginarWhere('tipoDeCopia', 1, 'fecha', $registros_por_pagina, $paginacion->offset());
             }
             //Se encontraron registros, por lo cual instanciamos la paginación con sus atributos
             $paginacion = new Paginacion($pagina_actual, $registros_por_pagina, $total_registros);
@@ -51,15 +51,16 @@ class IncrementalInformesController
         //No se usó un filtro (No se utilizó el input type date)
         else {
             //Contamos todos los registros, instanciamos la paginación, ordenamos y paginamos los registros
-            $total_registros = CopiasEncabezado::total();
+            $total_registros = CopiasEncabezado::totalWhere('tipoDeCopia', 1);
             $paginacion = new Paginacion($pagina_actual, $registros_por_pagina, $total_registros);
-            $copias = CopiasEncabezado::paginar('fecha', $registros_por_pagina, $paginacion->offset());
+            //Ordenamos y páginamos los registros dependiendo del tipo de copia (Where (tabla) = (valor) ORDER BY (columna) ASC LIMIT (porPagina) OFFSET (offset))
+            $copias = CopiasEncabezado::paginarWhere('tipoDeCopia', 1, 'fecha', $registros_por_pagina, $paginacion->offset());
+            // debuguear($total_registros);
         }
-
         // Validación extra: Ejmplo, totalPaginas = 20 y $pagina_Actual = 21
         //Si el totalPaginas es 20, el usuario no puede estar en la 21 ya que no existe
         if ($paginacion->totalPaginas() < $pagina_actual) {
-            header('Location: /copias?page=1');
+            header('Location: /incremental-descargar-diaria?page=1');
         }
         //Convertimos los 0 y 1 de la columna tipoDeCopia en strings para usarlos en la vista
         foreach ($copias as $copia) {

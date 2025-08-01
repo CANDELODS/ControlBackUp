@@ -3,8 +3,8 @@
     <div class="main__contenedor">
         <div class="main__intro">
             <h1 class="main__h1"><?php echo $titulo; ?></h1>
-            <p class="main__p">Aprovecha este apartado para editar y eliminar<br>
-                las copias, usa el buscador para encontrar<br>
+            <p class="main__p">Aprovecha este apartado para descargar los informes<br>
+                diarios de las copias incrementales,<br>usa el buscador para encontrar<br>
                 más fácil la copia deseada, y si quieres<br>
                 quitar ese filtro haz click en el botón<br>
                 "Borrar Filtro" para poder ver todas las copias
@@ -16,13 +16,13 @@
     </div>
 <!--Este formulario nos permitirá filtrar las copias, mandamos las fechas por la URL y la obtenemos en el CopiasController.php-->
     <div class="main__filtros">
-        <form class="formularioFiltro" method="GET" action="/copias">
+        <form class="formularioFiltro" method="GET" action="/incremental-descargar-diaria">
             <label class="formularioFiltro__label" for="fecha">Selecciona una fecha para filtrar:</label>
             <input class="formularioFiltro__date" id="fecha" type="date" name="fecha" value="<?php echo $_GET['fecha'] ?? ''; ?>">
             <input class="formularioFiltro__submit" type="submit" value="Buscar">
         </form>
 <!--Este enlace nos servirá para volver a ver todos los resultados cuando el usuario haya filtrado los datos-->
-        <a href="/copias?page=1" class="main__btn main__btn--bf">Borrar Filtro</a>
+        <a href="/incremental-descargar-diaria?page=1" class="main__btn main__btn--bf">Borrar Filtro</a>
 
     </div>
 
