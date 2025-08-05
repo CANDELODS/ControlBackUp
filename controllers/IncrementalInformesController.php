@@ -2,16 +2,20 @@
 
 namespace Controllers;
 
+use TCPDF;
+
 use MVC\Router;
 use Model\Usuario;
 use Classes\Paginacion;
 use Model\CopiasDetalle;
 use Model\CopiasEncabezado;
+use Model\Equipos;
 
 class IncrementalInformesController
 {
     public static function get(Router $router)
-    {        if (!isAuth()) {
+    {
+        if (!isAuth()) {
             header('Location: /login');
         }
         //Obtenemos la fecha de la URL
@@ -78,5 +82,90 @@ class IncrementalInformesController
             'paginacion' => $paginacion->paginacion(),
             'sin_resultados' => $sin_resultados
         ]);
+    }
+
+    public static function exportarPDF()
+    {
+        if (!isAuth()) {
+            header('Location: /login');
+            exit;
+        }
+
+        $fecha = $_GET['fecha'] ?? '';
+        if (!$fecha) {
+            header('Location: /incremental-descargar-diaria');
+            exit;
+        }
+
+        // Obtenemos todas las copias incrementales de esa fecha
+        $copias = CopiasEncabezado::whereLike('fecha', $fecha);
+        $copias = array_filter($copias, fn($copia) => $copia->tipoDeCopia == 1);
+
+        // Si no hay copias, redirigir o mostrar mensaje
+        if (empty($copias)) {
+            echo "<script>alert('No se encontraron registros para la fecha seleccionada.');window.location.href='/incremental-descargar-diaria';</script>";
+            exit;
+        }
+
+        // Cargamos los detalles (puedes optimizar esto con una consulta con JOIN si deseas)
+        //OPTIMIZAR PARA TRAER SOLO LOS DETALLES DE LAS COPIAS QUE SE VAN A MOSTRAR
+        $detalles = CopiasDetalle::all();
+
+        // Instanciamos TCPDF
+        $pdf = new \TCPDF();
+        $pdf->SetCreator(PDF_CREATOR);
+        $pdf->SetAuthor('Tu Sistema');
+        $pdf->SetTitle("Reporte Diario - Incremental $fecha");
+        $pdf->SetMargins(10, 10, 10, true);
+        $pdf->AddPage();
+
+        // Título
+        $pdf->SetFont('helvetica', 'B', 16);
+        $pdf->Cell(0, 10, "Reporte Diario - Incremental ($fecha)", 0, 1, 'C');
+
+        // Espacio
+        $pdf->Ln(5);
+        $pdf->SetFont('helvetica', '', 10);
+
+        // Encabezado de la tabla
+        $html = '<table border="1" cellspacing="0" cellpadding="4">
+                <thead>
+                    <tr style="background-color:#f2f2f2;">
+                        <th>Fecha</th>
+                        <th>Equipo</th>
+                        <th>Local</th>
+                        <th>Nube</th>
+                        <th>Observaciones</th>
+                    </tr>
+                </thead>
+                <tbody>';
+
+        foreach ($copias as $copia) {
+            $detalleFiltrado = array_filter($detalles, fn($detalle) => $detalle->idCopiasEncabezado == $copia->id);
+            foreach ($detalleFiltrado as $detalle) {
+                //Se Crea Una LLave Llamada equipos Dentro Del Objeto De copiasDetalle Y La Buscamos Por Su Id(En La Tabla De Equipos)
+                $detalle->equipos = Equipos::find($detalle->idEquipos);
+                $equipo = $detalle->equipos->nombreEquipo; // Aquí puedes hacer un JOIN para obtener el nombre real
+                $local = $detalle->copiaLocal == '1' ? 'Sí' : 'No';
+                $nube = $detalle->copiaNube == '1' ? 'Sí' : 'No';
+                $observaciones = htmlspecialchars($detalle->observaciones ?? '', ENT_QUOTES);
+
+                $html .= "<tr>
+                        <td>{$copia->fecha}</td>
+                        <td>{$equipo}</td>
+                        <td>{$local}</td>
+                        <td>{$nube}</td>
+                        <td>{$observaciones}</td>
+                    </tr>";
+            }
+        }
+
+        $html .= '</tbody></table>';
+
+        // Agregamos el contenido al PDF
+        $pdf->writeHTML($html, true, false, true, false, '');
+
+        // Mostramos o descargamos
+        $pdf->Output("reporte_incremental_{$fecha}.pdf", 'I'); // 'I' para mostrar en navegador, 'D' para forzar descarga
     }
 }

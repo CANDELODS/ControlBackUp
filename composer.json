@@ -17,6 +17,7 @@
     ],
     "require": {
         "vlucas/phpdotenv": "^5.4",
-        "intervention/image": "^2.7"
+        "intervention/image": "^2.7",
+        "tecnickcom/tcpdf": "^6.10"
     }
 }

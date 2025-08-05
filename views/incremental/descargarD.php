@@ -52,13 +52,13 @@
                             <td class="table__td--acciones">
                                  <!-- Enlace para redirigir al usuario a la vista de editar-copia, además se manda el id de la copiaEncabezao a editar
                                  por medio de la URL -->
-                                <a class="table__accion table__accion--editar" href="editar-copia?id=<?php echo $copia->id; ?>">Editar</a>
+                                <a class="table__accion table__accion--editar" href="descargar-iid?fecha=<?php echo $copia->fecha; ?>">PDF</a>
                                  <!-- Botón para eliminar un equipo, además tiene un input de tipo hidden el cual manda el id del equipo
                                  al servidor y así poder eliminar el equipo -->
                                 <form method="post" action="eliminar-copia" class="table__form">
                                     <input type="hidden" name="id" value="<?php echo $copia->id; ?>">
                                     <button class="table__accion table__accion--eliminar" type="submit">
-                                        Eliminar
+                                        Excel
                                     </button>
                                 </form>
                             </td>
