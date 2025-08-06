@@ -96,31 +96,40 @@ class IncrementalInformesController
             header('Location: /incremental-descargar-diaria');
             exit;
         }
-
-        // Obtenemos todas las copias incrementales de esa fecha
-        $copias = CopiasEncabezado::whereLike('fecha', $fecha);
-        $copias = array_filter($copias, fn($copia) => $copia->tipoDeCopia == 1);
-
+        // Buscamos la copiaEncabezado por fecha
+        $copias = CopiasEncabezado::whereLike('fecha', $fecha);        
         // Si no hay copias, redirigir o mostrar mensaje
         if (empty($copias)) {
             echo "<script>alert('No se encontraron registros para la fecha seleccionada.');window.location.href='/incremental-descargar-diaria';</script>";
             exit;
         }
-
-        // Cargamos los detalles (puedes optimizar esto con una consulta con JOIN si deseas)
-        //OPTIMIZAR PARA TRAER SOLO LOS DETALLES DE LAS COPIAS QUE SE VAN A MOSTRAR
-        $detalles = CopiasDetalle::all();
+        //Extraemos el Id de la copiaEncabezado para usarlo en la consulta de detalles
+        $ids = array_map(fn($copia) => $copia->id, $copias);
+        $id = $ids[0];
+        
+        //Obtenemos los copiaDetalle relacionados con la copiaEncabezado
+        //El método allWhere filtra los detalles por el id de la copiaEncabezado
+        //1er parámetro: Nombre de la columna B, 2do parámetro: Tipo de copia, 3er parámetro: id de la copiaEncabezado, 4to parámetro: orden
+        $detalles = CopiasDetalle::allWhere('copiasencabezado', 1, $id, 'ASC');
 
         // Instanciamos TCPDF
         $pdf = new \TCPDF();
         $pdf->SetCreator(PDF_CREATOR);
-        $pdf->SetAuthor('Tu Sistema');
+        //Autor del documento
+        $pdf->SetAuthor('TI Ladrillera Melendez SA');
+        // Título del documento
         $pdf->SetTitle("Reporte Diario - Incremental $fecha");
+        //Márgenes del PDF (izquierda, arriba, derecha).
         $pdf->SetMargins(10, 10, 10, true);
+        //Agrega una página en blanco.
         $pdf->AddPage();
 
-        // Título
+        // TÍTULO
+        //Fuente, negrita y tamaño de letra
         $pdf->SetFont('helvetica', 'B', 16);
+        //Crear una celda (una línea de texto).
+        //0: Ancho de la celda (0 = Automático), 10: Alto de la celda, Texto, 0: Borde, 1: Salto de línea,
+        //C: Alineación (C = Centrado)
         $pdf->Cell(0, 10, "Reporte Diario - Incremental ($fecha)", 0, 1, 'C');
 
         // Espacio
@@ -141,11 +150,11 @@ class IncrementalInformesController
                 <tbody>';
 
         foreach ($copias as $copia) {
-            $detalleFiltrado = array_filter($detalles, fn($detalle) => $detalle->idCopiasEncabezado == $copia->id);
-            foreach ($detalleFiltrado as $detalle) {
+
+            foreach ($detalles as $detalle) {
                 //Se Crea Una LLave Llamada equipos Dentro Del Objeto De copiasDetalle Y La Buscamos Por Su Id(En La Tabla De Equipos)
                 $detalle->equipos = Equipos::find($detalle->idEquipos);
-                $equipo = $detalle->equipos->nombreEquipo; // Aquí puedes hacer un JOIN para obtener el nombre real
+                $equipo = $detalle->equipos->nombreEquipo;
                 $local = $detalle->copiaLocal == '1' ? 'Sí' : 'No';
                 $nube = $detalle->copiaNube == '1' ? 'Sí' : 'No';
                 $observaciones = htmlspecialchars($detalle->observaciones ?? '', ENT_QUOTES);
@@ -162,7 +171,7 @@ class IncrementalInformesController
 
         $html .= '</tbody></table>';
 
-        // Agregamos el contenido al PDF
+        // Agregamos el contenido al PDF (Convierte el HTML de la tabla a PDF)
         $pdf->writeHTML($html, true, false, true, false, '');
 
         // Mostramos o descargamos

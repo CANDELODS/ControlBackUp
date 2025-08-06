@@ -124,6 +124,18 @@ class ActiveRecord
         return $resultado;
     }
 
+    //Obtener registros dependiendo de una condición
+        public static function allWhere($tablaB, $tipodeCopia, $idCopiaEncabezado, $orden = 'DESC')
+    {
+        $query = "SELECT copiasdetalle.id, copiasdetalle.idCopiasEncabezado, copiasdetalle.idEquipos,
+        copiasdetalle.copiaLocal, copiasdetalle.copiaNube, copiasdetalle.observaciones 
+        FROM " . static::$tabla . " INNER JOIN ${tablaB} ON copiasdetalle.idCopiasEncabezado = copiasencabezado.id 
+        WHERE copiasencabezado.tipoDeCopia = ${tipodeCopia} AND copiasdetalle.idCopiasEncabezado = ${idCopiaEncabezado} 
+        ORDER BY id ${orden}";
+        $resultado = self::consultarSQL($query);
+        return $resultado;
+    }
+
     //Obtener todos los registro y ordenar por nombreArea
     public static function allA($orden = 'DESC')
     {
