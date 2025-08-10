@@ -3,15 +3,35 @@
 
 .tabla {
     @include m.contenedor-sm;
+    @include m.sombra;
+    border-radius: 1.5rem;
 
     &--scroll {
         @extend .tabla;
-        box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
-        border-radius: 1.5rem;
 
         @include m.tablet {
             overflow-y: scroll;
             height: 40rem;
+
+            &::-webkit-scrollbar {
+                //Todo El Elemento ScrollBar
+                width: 1rem;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                //Solo La Barra
+                background-color: #c2c2c2;
+                border-radius: 5px;
+            }
+        }
+    }
+
+    // Se usó el siguiente truco ya que existía un bug en el cual la tabla de la vista "equipos" no tenía el border
+    //Radius, según las pruebas fue por el scroll, por lo cual tocó hacerlo de esta manera
+    &--scrollX {
+        @extend .tabla;
+        @include m.tablet {
+            overflow-x: scroll;
 
             &::-webkit-scrollbar {
                 //Todo El Elemento ScrollBar
@@ -34,7 +54,6 @@
 .table {
     width: 100%;
     border-collapse: collapse;
-    border-radius: 1.5rem;
 
     &__thead {
         background-color: white;
@@ -68,10 +87,10 @@
 
         @include m.tablet {
             display: table-row;
-            border-bottom: 1px solid #c2c2c2;
+            border-bottom: 1px solid v.$grisTr;
 
             &:last-child {
-                border-bottom: 1px solid #c2c2c2;
+                border-bottom: 1px solid v.$grisTr;
             }
         }
 

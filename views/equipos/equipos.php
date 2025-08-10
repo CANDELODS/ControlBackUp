@@ -10,7 +10,7 @@
             <a href="/crear-equipo" class="main__btn main__btn--c">Crear Equipo</a>
         </div>
     </div>
-    <div class="tabla">
+    <div class="tabla--scrollX">
         <!-- Verificamos si hay equipos para mostrar -->
         <?php if (!empty($equipos)) { ?>
             <table class="table">

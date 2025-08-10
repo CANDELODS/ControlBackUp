@@ -592,11 +592,9 @@ h3 {
   gap: 1rem;
 }
 
-.tabla, .tabla--scroll {
+.tabla, .tabla--scrollX, .tabla--scroll {
   width: min(95%, 60rem);
   margin: 0 auto;
-}
-.tabla--scroll {
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   border-radius: 1.5rem;
 }
@@ -614,7 +612,19 @@ h3 {
   }
 }
 @media (min-width: 768px) {
-  .tabla, .tabla--scroll {
+  .tabla--scrollX {
+    overflow-x: scroll;
+  }
+  .tabla--scrollX::-webkit-scrollbar {
+    width: 1rem;
+  }
+  .tabla--scrollX::-webkit-scrollbar-thumb {
+    background-color: #c2c2c2;
+    border-radius: 5px;
+  }
+}
+@media (min-width: 768px) {
+  .tabla, .tabla--scrollX, .tabla--scroll {
     width: min(95%, 120rem);
     margin: 0 auto;
   }
@@ -623,7 +633,6 @@ h3 {
 .table {
   width: 100%;
   border-collapse: collapse;
-  border-radius: 1.5rem;
 }
 .table__thead {
   background-color: white;
@@ -653,10 +662,10 @@ h3 {
 @media (min-width: 768px) {
   .table__tr {
     display: table-row;
-    border-bottom: 1px solid #c2c2c2;
+    border-bottom: 1px solid #919191;
   }
   .table__tr:last-child {
-    border-bottom: 1px solid #c2c2c2;
+    border-bottom: 1px solid #919191;
   }
 }
 .table__tr:nth-child(even) {
@@ -891,7 +900,7 @@ h3 {
   padding: 2rem;
   background-color: white;
   border-radius: 2rem;
-  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 }
 @media (min-width: 768px) {
   .eformulario {
@@ -938,6 +947,9 @@ h3 {
   border: 1px solid #1a1b15;
   border-radius: 5rem;
   text-align: center;
+}
+.eformulario__input::placeholder {
+  color: black;
 }
 .eformulario__input--check {
   padding: 3rem;
@@ -1315,7 +1327,7 @@ h3 {
   }
 }
 .main {
-  background-color: white;
+  background-color: #F5F5F5;
   height: auto;
   padding-bottom: 2rem;
 }

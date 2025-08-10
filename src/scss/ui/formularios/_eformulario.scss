@@ -60,7 +60,9 @@
         border: 1px solid v.$negro;
         border-radius: 5rem;
         text-align: center;
-
+        &::placeholder{
+            color: black;
+        }
         &--check {
             padding: 3rem;
             border: 1px solid v.$negro;

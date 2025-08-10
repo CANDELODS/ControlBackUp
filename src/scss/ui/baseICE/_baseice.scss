@@ -2,7 +2,7 @@
 @use 'base/mixins' as m;
 
 .main {
-    background-color: white;
+    background-color: v.$grisFondo;
     height: auto;
     padding-bottom: 2rem;
 
