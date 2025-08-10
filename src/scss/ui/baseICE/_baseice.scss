@@ -2,7 +2,7 @@
 @use 'base/mixins' as m;
 
 .main {
-    background-color: v.$grisFondo;
+    background-color: white;
     height: auto;
     padding-bottom: 2rem;
 
@@ -103,11 +103,11 @@
         }
         //Btn Descargar Informes Mensuales (Incremental.php)
         &--m{
-            background-color: v.$amarilloLight;
-            border-color: v.$amarilloLight;
+            background-color: v.$azulMensual;
+            border-color: v.$azulMensual;
             width: auto;
             &:hover{
-                color: v.$amarilloLight;
+                color: v.$azulMensual;
             }
         }
     }

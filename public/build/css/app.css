@@ -596,10 +596,21 @@ h3 {
   width: min(95%, 60rem);
   margin: 0 auto;
 }
+.tabla--scroll {
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  border-radius: 1.5rem;
+}
 @media (min-width: 768px) {
   .tabla--scroll {
     overflow-y: scroll;
     height: 40rem;
+  }
+  .tabla--scroll::-webkit-scrollbar {
+    width: 1rem;
+  }
+  .tabla--scroll::-webkit-scrollbar-thumb {
+    background-color: #c2c2c2;
+    border-radius: 5px;
   }
 }
 @media (min-width: 768px) {
@@ -612,11 +623,11 @@ h3 {
 .table {
   width: 100%;
   border-collapse: collapse;
-  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  border-radius: 1.5rem;
 }
 .table__thead {
-  background-color: #404040;
-  color: white;
+  background-color: white;
+  color: #1a1b15;
   display: none;
 }
 @media (min-width: 768px) {
@@ -624,18 +635,28 @@ h3 {
     display: table-header-group;
   }
 }
+.table__trhead {
+  border-bottom: 1px solid #c2c2c2;
+}
 .table__th {
-  padding: 1rem;
+  padding: 1.5rem 2rem;
   text-align: left;
 }
 .table__tr {
   display: block;
-  border-bottom: 1px solid #1a1b15;
+  border-bottom: 1px solid black;
   transition: background-color 0.2s ease-in-out;
+}
+.table__tr:last-child {
+  border-bottom: none;
 }
 @media (min-width: 768px) {
   .table__tr {
     display: table-row;
+    border-bottom: 1px solid #c2c2c2;
+  }
+  .table__tr:last-child {
+    border-bottom: 1px solid #c2c2c2;
   }
 }
 .table__tr:nth-child(even) {
@@ -647,10 +668,10 @@ h3 {
 }
 .table__td, .table__td--acciones {
   display: block;
-  padding: 1.5rem 1rem;
+  padding: 1.5rem 2rem;
   text-align: right;
   position: relative;
-  border-bottom: 1px solid #1a1b15;
+  border-bottom: 1px solid #c2c2c2;
 }
 .table__td:last-child, .table__td--acciones:last-child {
   border-bottom: none;
@@ -667,6 +688,7 @@ h3 {
   .table__td, .table__td--acciones {
     display: table-cell;
     text-align: left;
+    border-bottom: 1px solid #1a1b15;
     border-bottom: none;
   }
   .table__td::before, .table__td--acciones::before {
@@ -1293,7 +1315,7 @@ h3 {
   }
 }
 .main {
-  background-color: #F5F5F5;
+  background-color: white;
   height: auto;
   padding-bottom: 2rem;
 }
@@ -1406,12 +1428,12 @@ h3 {
   color: #BE934F;
 }
 .main__btn--m {
-  background-color: #EEFF00;
-  border-color: #EEFF00;
+  background-color: #0064ff;
+  border-color: #0064ff;
   width: auto;
 }
 .main__btn--m:hover {
-  color: #EEFF00;
+  color: #0064ff;
 }
 .main__fi {
   display: flex;

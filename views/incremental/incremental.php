@@ -17,7 +17,7 @@
             <?php if (!empty($equipos)) { ?>
                 <table class="table">
                     <thead class="table__thead">
-                        <tr>
+                        <tr class="table__trhead">
                             <th scope="col" class="table__th">Nombre</th>
                             <th scope="col" class="table__th">Área</th>
                             <th scope="col" class="table__th">Local</th>

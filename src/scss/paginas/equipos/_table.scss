@@ -6,10 +6,23 @@
 
     &--scroll {
         @extend .tabla;
+        box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+        border-radius: 1.5rem;
 
         @include m.tablet {
             overflow-y: scroll;
             height: 40rem;
+
+            &::-webkit-scrollbar {
+                //Todo El Elemento ScrollBar
+                width: 1rem;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                //Solo La Barra
+                background-color: #c2c2c2;
+                border-radius: 5px;
+            }
         }
     }
 
@@ -21,11 +34,11 @@
 .table {
     width: 100%;
     border-collapse: collapse;
-    @include m.sombra;
+    border-radius: 1.5rem;
 
     &__thead {
-        background-color: v.$gris;
-        color: white;
+        background-color: white;
+        color: v.$negro;
         //Escondemos los encabezados en pantallas pequeñas
         display: none;
 
@@ -34,18 +47,32 @@
         }
     }
 
+    &__trhead {
+        border-bottom: 1px solid #c2c2c2;
+    }
+
     &__th {
-        padding: 1rem;
+        padding: 1.5rem 2rem;
         text-align: left;
     }
 
     &__tr {
         //Cambiamos el display a block para que se vea bien en pantallas pequeñas
         display: block;
-        border-bottom: 1px solid v.$negro;
+        border-bottom: 1px solid black;
         transition: background-color 0.2s ease-in-out;
+
+        &:last-child {
+            border-bottom: none;
+        }
+
         @include m.tablet {
             display: table-row;
+            border-bottom: 1px solid #c2c2c2;
+
+            &:last-child {
+                border-bottom: 1px solid #c2c2c2;
+            }
         }
 
         &:nth-child(even) {
@@ -61,10 +88,10 @@
     &__td {
         //Cambiamos el display a block para que se vea bien en pantallas pequeñas
         display: block;
-        padding: 1.5rem 1rem;
+        padding: 1.5rem 2rem;
         text-align: right;
         position: relative;
-        border-bottom: 1px solid v.$negro;
+        border-bottom: 1px solid #c2c2c2;
 
         &:last-child {
             border-bottom: none;
@@ -83,6 +110,7 @@
         @include m.tablet {
             display: table-cell;
             text-align: left;
+            border-bottom: 1px solid v.$negro;
 
             &::before {
                 content: none;
