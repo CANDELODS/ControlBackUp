@@ -3,6 +3,12 @@
 namespace Controllers;
 
 use TCPDF;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+
 
 use MVC\Router;
 use Model\Usuario;
@@ -97,7 +103,7 @@ class IncrementalInformesController
             exit;
         }
         // Buscamos la copiaEncabezado por fecha
-        $copias = CopiasEncabezado::whereLike('fecha', $fecha);        
+        $copias = CopiasEncabezado::whereLike('fecha', $fecha);
         // Si no hay copias, redirigir o mostrar mensaje
         if (empty($copias)) {
             echo "<script>alert('No se encontraron registros para la fecha seleccionada.');window.location.href='/incremental-descargar-diaria';</script>";
@@ -106,7 +112,7 @@ class IncrementalInformesController
         //Extraemos el Id de la copiaEncabezado para usarlo en la consulta de detalles
         $ids = array_map(fn($copia) => $copia->id, $copias);
         $id = $ids[0];
-        
+
         //Obtenemos los copiaDetalle relacionados con la copiaEncabezado
         //El método allWhere filtra los detalles por el id de la copiaEncabezado
         //1er parámetro: Nombre de la columna B, 2do parámetro: Tipo de copia, 3er parámetro: id de la copiaEncabezado, 4to parámetro: orden
@@ -140,7 +146,6 @@ class IncrementalInformesController
         $html = '<table border="1" cellspacing="0" cellpadding="4">
                 <thead>
                     <tr style="background-color:#f2f2f2;">
-                        <th>Fecha</th>
                         <th>Equipo</th>
                         <th>Local</th>
                         <th>Nube</th>
@@ -160,7 +165,6 @@ class IncrementalInformesController
                 $observaciones = htmlspecialchars($detalle->observaciones ?? '', ENT_QUOTES);
 
                 $html .= "<tr>
-                        <td>{$copia->fecha}</td>
                         <td>{$equipo}</td>
                         <td>{$local}</td>
                         <td>{$nube}</td>
@@ -176,5 +180,136 @@ class IncrementalInformesController
 
         // Mostramos o descargamos
         $pdf->Output("reporte_incremental_{$fecha}.pdf", 'I'); // 'I' para mostrar en navegador, 'D' para forzar descarga
+    }
+
+    public static function exportarExcel()
+    {
+        if (!isAuth()) {
+            header('Location: /login');
+            exit;
+        }
+
+        $fecha = $_GET['fecha'] ?? '';
+        $nombreArchivo = "Reporte Diario - Incremental {$fecha}.xlsx";
+        if (!$fecha) {
+            header('Location: /incremental-descargar-diaria');
+            exit;
+        }
+
+        // Buscar copias encabezado por fecha
+        $copias = CopiasEncabezado::whereLike('fecha', $fecha);
+        if (empty($copias)) {
+            echo "<script>alert('No se encontraron registros para la fecha seleccionada.');window.location.href='/incremental-descargar-diaria';</script>";
+            exit;
+        }
+
+        $ids = array_map(fn($copia) => $copia->id, $copias);
+        $id = $ids[0];
+
+        $detalles = CopiasDetalle::allWhere('copiasencabezado', 1, $id, 'DESC');
+
+        // Añadir nombres de equipos para ordenar
+        foreach ($detalles as $detalle) {
+            $detalle->equipos = Equipos::find($detalle->idEquipos);
+            $detalle->nombreEquipo = $detalle->equipos->nombreEquipo;
+        }
+
+        // Ordenar alfabéticamente
+        usort($detalles, fn($a, $b) => strcmp($a->nombreEquipo, $b->nombreEquipo));
+
+        // Crear Excel
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Encabezados
+        $sheet->setCellValue('A1', 'Equipo');
+        $sheet->setCellValue('B1', 'Copia Local');
+        $sheet->setCellValue('C1', 'Copia Nube');
+        $sheet->setCellValue('D1', 'Observaciones');
+
+        // Estilos de encabezado
+        $headerStyle = [
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'color' => ['rgb' => '4F81BD']
+            ]
+        ];
+        $sheet->getStyle('A1:D1')->applyFromArray($headerStyle);
+
+        // Llenar datos
+        $fila = 2;
+        $totalLocalSi = $totalLocalNo = $totalNubeSi = $totalNubeNo = 0;
+
+        foreach ($detalles as $detalle) {
+            $sheet->setCellValue('A' . $fila, $detalle->nombreEquipo);
+
+            $valorLocal = $detalle->copiaLocal ? 'Sí' : 'No';
+            $valorNube = $detalle->copiaNube ? 'Sí' : 'No';
+
+            if ($valorLocal === 'Sí') $totalLocalSi++;
+            else $totalLocalNo++;
+            if ($valorNube === 'Sí') $totalNubeSi++;
+            else $totalNubeNo++;
+
+            $sheet->setCellValue('B' . $fila, $valorLocal);
+            $sheet->setCellValue('C' . $fila, $valorNube);
+            $sheet->setCellValue('D' . $fila, $detalle->observaciones ?: '');
+
+            $fila++;
+        }
+
+        $ultimaFila = $fila - 1;
+
+        // Formato condicional para columnas B y C
+        $condicionalSi = new \PhpOffice\PhpSpreadsheet\Style\Conditional();
+        $condicionalSi->setConditionType(\PhpOffice\PhpSpreadsheet\Style\Conditional::CONDITION_CELLIS)
+            ->setOperatorType(\PhpOffice\PhpSpreadsheet\Style\Conditional::OPERATOR_EQUAL)
+            ->addCondition('"Sí"')
+            ->getStyle()->getFont()->getColor()->setRGB('008000'); // Verde
+
+        $condicionalNo = new \PhpOffice\PhpSpreadsheet\Style\Conditional();
+        $condicionalNo->setConditionType(\PhpOffice\PhpSpreadsheet\Style\Conditional::CONDITION_CELLIS)
+            ->setOperatorType(\PhpOffice\PhpSpreadsheet\Style\Conditional::OPERATOR_EQUAL)
+            ->addCondition('"No"')
+            ->getStyle()->getFont()->getColor()->setRGB('FF0000'); // Rojo
+
+        $sheet->getStyle("B2:B{$ultimaFila}")->setConditionalStyles([$condicionalSi, $condicionalNo]);
+        $sheet->getStyle("C2:C{$ultimaFila}")->setConditionalStyles([$condicionalSi, $condicionalNo]);
+
+        // Resumen con totales
+        $filaResumen = $ultimaFila + 2;
+        $sheet->setCellValue("A{$filaResumen}", 'Totales:');
+        $sheet->setCellValue("B{$filaResumen}", "Local Sí: {$totalLocalSi}");
+        $sheet->setCellValue("B" . ($filaResumen + 1), "Local No: {$totalLocalNo}");
+        $sheet->setCellValue("C{$filaResumen}", "Nube Sí: {$totalNubeSi}");
+        $sheet->setCellValue("C" . ($filaResumen + 1), "Nube No: {$totalNubeNo}");
+
+        // Bordes en tabla de datos
+        $sheet->getStyle("A1:D{$ultimaFila}")->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000']
+                ]
+            ]
+        ]);
+
+        // Auto filtro (solo encabezado)
+        $sheet->setAutoFilter('A1:D1');
+
+        // Autoajustar columnas
+        foreach (range('A', 'D') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Descargar archivo
+        $writer = new Xlsx($spreadsheet);
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment;filename=\"{$nombreArchivo}\"");
+        header('Cache-Control: max-age=0');
+        $writer->save('php://output');
+        exit;
     }
 }

@@ -26,7 +26,7 @@
 
     </div>
 
-    <div class="tabla">
+    <div class="tabla--scrollX">
         <!-- Verifficamos si hay copias para mostrar -->
         <?php if (!empty($copias)) { ?>
             <table class="table">

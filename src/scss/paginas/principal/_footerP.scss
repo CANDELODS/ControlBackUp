@@ -70,6 +70,7 @@
 
     &__enlace {
         @include m.boton(v.$verdeC, v.$blanco);
+        @include m.sombraBTN;
         font-size: 1.4rem;
         width: auto;
 

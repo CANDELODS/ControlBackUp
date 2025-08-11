@@ -21,11 +21,11 @@
             padding: 1rem;
             border-radius: .5rem;
             border: 1px solid v.$principal;
+            transition: 300ms background-color ease, 300ms color ease;
 
             &:hover{
                 background-color: v.$principal;
                 color: white;
-                transition: 300ms background-color ease, 300ms color ease;
             }
         }
 

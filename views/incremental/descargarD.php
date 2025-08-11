@@ -14,19 +14,19 @@
             <a href="/principal" class="main__btn main__btn--c">Regresar</a>
         </div>
     </div>
-<!--Este formulario nos permitirá filtrar las copias, mandamos las fechas por la URL y la obtenemos en el CopiasController.php-->
+    <!--Este formulario nos permitirá filtrar las copias, mandamos las fechas por la URL y la obtenemos en el CopiasController.php-->
     <div class="main__filtros">
         <form class="formularioFiltro" method="GET" action="/incremental-descargar-diaria">
             <label class="formularioFiltro__label" for="fecha">Selecciona una fecha para filtrar:</label>
             <input class="formularioFiltro__date" id="fecha" type="date" name="fecha" value="<?php echo $_GET['fecha'] ?? ''; ?>">
             <input class="formularioFiltro__submit" type="submit" value="Buscar">
         </form>
-<!--Este enlace nos servirá para volver a ver todos los resultados cuando el usuario haya filtrado los datos-->
+        <!--Este enlace nos servirá para volver a ver todos los resultados cuando el usuario haya filtrado los datos-->
         <a href="/incremental-descargar-diaria?page=1" class="main__btn main__btn--bf">Borrar Filtro</a>
 
     </div>
 
-    <div class="tabla">
+    <div class="tabla--scrollX">
         <!-- Verifficamos si hay copias para mostrar -->
         <?php if (!empty($copias)) { ?>
             <table class="table">
@@ -42,25 +42,24 @@
                     <?php foreach ($copias as $copia) { ?>
                         <tr class="table__tr">
                             <td data-label="Fecha" class="table__td">
-                                 <!-- Mostramos la fecha de cada copia -->
+                                <!-- Mostramos la fecha de cada copia -->
                                 <?php echo $copia->fecha; ?>
                             </td>
                             <td data-label="Tipo De Copia" class="table__td">
-                                 <!-- Mostramos el tiopoDeCopia de cada copia -->
+                                <!-- Mostramos el tiopoDeCopia de cada copia -->
                                 <?php echo $copia->tipoDeCopia; ?>
                             </td>
                             <td class="table__td--acciones">
-                                 <!-- Enlace para redirigir al usuario a la vista de editar-copia, además se manda el id de la copiaEncabezao a editar
+                                <!-- Enlace para redirigir al usuario a la vista de editar-copia, además se manda el id de la copiaEncabezao a editar
                                  por medio de la URL -->
-                                <a class="table__accion table__accion--editar" href="descargar-iid?fecha=<?php echo $copia->fecha; ?>">PDF</a>
-                                 <!-- Botón para eliminar un equipo, además tiene un input de tipo hidden el cual manda el id del equipo
-                                 al servidor y así poder eliminar el equipo -->
-                                <form method="post" action="eliminar-copia" class="table__form">
-                                    <input type="hidden" name="id" value="<?php echo $copia->id; ?>">
-                                    <button class="table__accion table__accion--eliminar" type="submit">
-                                        Excel
-                                    </button>
-                                </form>
+                                <a class="table__accion table__accion--descargarPDF" href="descargar-iid?fecha=<?php echo $copia->fecha; ?>">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                    PDF
+                                </a>
+                                <a class="table__accion table__accion--descargarExcel" href="descargar-iide?fecha=<?php echo $copia->fecha; ?>">
+                                    <i class="fa-solid fa-file-excel"></i>
+                                    EXCEL
+                                </a>
                             </td>
                         </tr>
                     <?php } ?> <!--Fin foreach($copias as $copia)-->
@@ -70,9 +69,9 @@
             <!--En CopiasController mandamos a la vista la variable $sin_resultados, la cual es true si no hay
             Resultados y false si se encontraron resultados al usar el filtro  -->
             <?php if ($sin_resultados) { ?>
-                 <p class="alerta alerta__error">No se encontraron copias con la fecha ingresada.</p>
-                <?php } else { ?>
-            <p class="text-center">No Hay Copias Para Listar</p>
+                <p class="alerta alerta__error">No se encontraron copias con la fecha ingresada.</p>
+            <?php } else { ?>
+                <p class="text-center">No Hay Copias Para Listar</p>
             <?php } ?>
         <?php } ?><!--Fin if(!empty($copias))-->
     </div>

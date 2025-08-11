@@ -85,7 +85,7 @@
     &__enlace {
         @include m.boton(v.$principal, v.$blanco);
         width: auto;
-        box-shadow: 4px 4px 4px 0 v.$negro;
+        @include m.sombraBTN;
     }
 }
 

@@ -17,6 +17,7 @@
 
     &__submit{
         @include m.botonDos(v.$cafe, v.$blanco);
+        @include m.sombraBTN;
         font-size: 1.4rem;
         width: auto;
         @include m.tablet{

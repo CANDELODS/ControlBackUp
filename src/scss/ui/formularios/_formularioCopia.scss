@@ -39,6 +39,7 @@
 
     &__btn {
         @include m.botonDos(v.$verde, white);
+        @include m.sombraBTN;
         width: auto;
     }
 }

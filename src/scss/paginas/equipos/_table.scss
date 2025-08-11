@@ -30,6 +30,7 @@
     //Radius, según las pruebas fue por el scroll, por lo cual tocó hacerlo de esta manera
     &--scrollX {
         @extend .tabla;
+
         @include m.tablet {
             overflow-x: scroll;
 
@@ -162,6 +163,7 @@
             width: auto;
             padding: 1.5rem;
             font-size: 1.4rem;
+            @include m.sombraBTN;
         }
 
         &--eliminar {
@@ -169,6 +171,23 @@
             width: auto;
             padding: 1.5rem;
             font-size: 1.4rem;
+            @include m.sombraBTN;
+        }
+
+        &--descargarPDF {
+            @include m.boton(v.$rojoPDF, v.$blanco);
+            width: auto;
+            padding: 1.5rem;
+            font-size: 1.4rem;
+            @include m.sombraBTN;
+        }
+
+        &--descargarExcel {
+            @include m.boton(v.$verdeExcel, v.$blanco);
+            width: auto;
+            padding: 1.5rem;
+            font-size: 1.4rem;
+            @include m.sombraBTN;
         }
     }
 }

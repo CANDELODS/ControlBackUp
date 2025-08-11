@@ -83,6 +83,7 @@
 
     &__submit {
         @include m.boton(v.$principal, v.$blanco);
+        @include m.sombraBTN;
         width: auto;
         font-size: 1.6rem;
 
