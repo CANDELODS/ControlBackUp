@@ -113,10 +113,22 @@ class IncrementalInformesController
         $ids = array_map(fn($copia) => $copia->id, $copias);
         $id = $ids[0];
 
-        //Obtenemos los copiaDetalle relacionados con la copiaEncabezado
+        // Obtenemos los copiaDetalle relacionados con la copiaEncabezado, ordenados por nombre de equipo
         //El método allWhere filtra los detalles por el id de la copiaEncabezado
         //1er parámetro: Nombre de la columna B, 2do parámetro: Tipo de copia, 3er parámetro: id de la copiaEncabezado, 4to parámetro: orden
         $detalles = CopiasDetalle::allWhere('copiasencabezado', 1, $id, 'ASC');
+
+        // Relacionar con nombres de equipo
+        foreach ($detalles as $detalle) {
+            //Se Crea Una LLave Llamada equipos Dentro Del Objeto De copiasDetalle Y La Buscamos Por Su Id(En La Tabla De Equipos)
+            $detalle->equipos = Equipos::find($detalle->idEquipos);
+        }
+
+        // Ordenar alfabéticamente por nombre de equipo
+        usort($detalles, fn($a, $b) => strcmp($a->equipos->nombreEquipo, $b->equipos->nombreEquipo));
+
+        // Totales
+        $totalLocalSi = $totalLocalNo = $totalNubeSi = $totalNubeNo = 0;
 
         // Instanciamos TCPDF
         $pdf = new \TCPDF();
@@ -142,44 +154,69 @@ class IncrementalInformesController
         $pdf->Ln(5);
         $pdf->SetFont('helvetica', '', 10);
 
-        // Encabezado de la tabla
+        // Tabla principal
         $html = '<table border="1" cellspacing="0" cellpadding="4">
-                <thead>
-                    <tr style="background-color:#f2f2f2;">
-                        <th>Equipo</th>
-                        <th>Local</th>
-                        <th>Nube</th>
-                        <th>Observaciones</th>
-                    </tr>
-                </thead>
-                <tbody>';
+            <thead>
+                <tr style="background-color:#f2f2f2; font-weight:bold; text-align:center;">
+                    <th>Equipo</th>
+                    <th>Local</th>
+                    <th>Nube</th>
+                    <th>Observaciones</th>
+                </tr>
+            </thead>
+            <tbody>';
 
-        foreach ($copias as $copia) {
+        foreach ($detalles as $detalle) {
+            $equipo = $detalle->equipos->nombreEquipo ?? '';
+            $local = $detalle->copiaLocal == '1' ? 'Sí' : 'No';
+            $nube = $detalle->copiaNube == '1' ? 'Sí' : 'No';
+            $observaciones = htmlspecialchars($detalle->observaciones ?? '', ENT_QUOTES);
 
-            foreach ($detalles as $detalle) {
-                //Se Crea Una LLave Llamada equipos Dentro Del Objeto De copiasDetalle Y La Buscamos Por Su Id(En La Tabla De Equipos)
-                $detalle->equipos = Equipos::find($detalle->idEquipos);
-                $equipo = $detalle->equipos->nombreEquipo;
-                $local = $detalle->copiaLocal == '1' ? 'Sí' : 'No';
-                $nube = $detalle->copiaNube == '1' ? 'Sí' : 'No';
-                $observaciones = htmlspecialchars($detalle->observaciones ?? '', ENT_QUOTES);
+            // Contar totales
+            if ($local === 'Sí') $totalLocalSi++;
+            else $totalLocalNo++;
+            if ($nube === 'Sí') $totalNubeSi++;
+            else $totalNubeNo++;
 
-                $html .= "<tr>
-                        <td>{$equipo}</td>
-                        <td>{$local}</td>
-                        <td>{$nube}</td>
-                        <td>{$observaciones}</td>
-                    </tr>";
-            }
+            // Colores condicionales
+            $colorLocal = $local === 'Sí' ? '#C6EFCE' : '#FFC7CE';
+            $colorNube = $nube === 'Sí' ? '#C6EFCE' : '#FFC7CE';
+
+            $html .= "<tr>
+                    <td>{$equipo}</td>
+                    <td style='background-color:{$colorLocal}; color:black; text-align:center;'>{$local}</td>
+                    <td style='background-color:{$colorNube}; color:black; text-align:center;'>{$nube}</td>
+                    <td>" . ($observaciones ?: '') . "</td>
+                </tr>";
         }
 
         $html .= '</tbody></table>';
 
+        // Totales al final
+        $html .= '<br><br>
+    <table border="1" cellpadding="4">
+        <tr style="background-color:#f2f2f2; font-weight:bold; text-align:center;">
+            <th colspan="2">Totales</th>
+        </tr>
+        <tr>
+            <td>Local Sí:</td><td>' . $totalLocalSi . '</td>
+        </tr>
+        <tr>
+            <td>Local No:</td><td>' . $totalLocalNo . '</td>
+        </tr>
+        <tr>
+            <td>Nube Sí:</td><td>' . $totalNubeSi . '</td>
+        </tr>
+        <tr>
+            <td>Nube No:</td><td>' . $totalNubeNo . '</td>
+        </tr>
+    </table>';
+
         // Agregamos el contenido al PDF (Convierte el HTML de la tabla a PDF)
         $pdf->writeHTML($html, true, false, true, false, '');
-
         // Mostramos o descargamos
-        $pdf->Output("reporte_incremental_{$fecha}.pdf", 'I'); // 'I' para mostrar en navegador, 'D' para forzar descarga
+        $pdf->Output("Reporte Diario - Incremental {$fecha}.pdf", 'I'); // 'I' para mostrar en navegador, 'D' para forzar descarga
+
     }
 
     public static function exportarExcel()
@@ -203,31 +240,43 @@ class IncrementalInformesController
             exit;
         }
 
+        //Extraemos el Id de la copiaEncabezado para usarlo en la consulta de detalles
         $ids = array_map(fn($copia) => $copia->id, $copias);
         $id = $ids[0];
 
+        //Obtenemos los copiaDetalle relacionados con la copiaEncabezado
+        //El método allWhere filtra los detalles por el id de la copiaEncabezado
+        //1er parámetro: Nombre de la columna B, 2do parámetro: Tipo de copia, 3er parámetro: id de la copiaEncabezado, 4to parámetro: orden
         $detalles = CopiasDetalle::allWhere('copiasencabezado', 1, $id, 'DESC');
 
         // Añadir nombres de equipos para ordenar
         foreach ($detalles as $detalle) {
+            //Se Crea Una LLave Llamada equipos Dentro Del Objeto De copiasDetalle Y La Buscamos Por Su Id(En La Tabla De Equipos)
             $detalle->equipos = Equipos::find($detalle->idEquipos);
             $detalle->nombreEquipo = $detalle->equipos->nombreEquipo;
         }
 
-        // Ordenar alfabéticamente
+        // ORDENAR ALFABETICAMENTE
+        //Ordenamos el arreglo $detalles usando $nobreEquipo como llave de comparación
+        //La función strcmp compara dos cadenas de texto y devuelve 0 si son iguales, un valor menor que 0 si la primera es menor que la segunda, o un valor mayor que 0 si la primera es mayor que la segunda.
+        //La función usort nos permite ordernar un arreglo dependiendo de una función de comparación fn, usort no devuelve una copia ordenada del array, sino que modifica el array original.
         usort($detalles, fn($a, $b) => strcmp($a->nombreEquipo, $b->nombreEquipo));
 
-        // Crear Excel
+        // CREAR EXCEL
+        //Creamos el objeto de PhpSpreadsheet 
         $spreadsheet = new Spreadsheet();
+        //Obtenemos la hoja activa en donde se escribirán los datos
         $sheet = $spreadsheet->getActiveSheet();
 
-        // Encabezados
+        // ENCABEZADOS
+        //Todos estos irán en la primera fila
         $sheet->setCellValue('A1', 'Equipo');
         $sheet->setCellValue('B1', 'Copia Local');
         $sheet->setCellValue('C1', 'Copia Nube');
         $sheet->setCellValue('D1', 'Observaciones');
 
-        // Estilos de encabezado
+        // ESTILOS DEL ENCABEZADO
+        //Fuente en negrita, color de texto blanco, centra horizontalmente y aplicamos un fondo de color azul #4F81BD al rango A1:D1.
         $headerStyle = [
             'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
             'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
@@ -238,47 +287,61 @@ class IncrementalInformesController
         ];
         $sheet->getStyle('A1:D1')->applyFromArray($headerStyle);
 
-        // Llenar datos
+        // LLENADO DE DATOS
+        //Iniciamos la fila en 2 porque la 1ra fila ya tiene los encabezados
         $fila = 2;
+        //Inicializamos los contadores para los totales de copias locales y en la nube
         $totalLocalSi = $totalLocalNo = $totalNubeSi = $totalNubeNo = 0;
 
+        //Iteramos sobre los detalles de las copias
         foreach ($detalles as $detalle) {
+            //Con la función setCellValue() establecemos el valor de la celda
+            //Parámetros: 1er = Columna, 2do = Fila, 3ero = Valor
             $sheet->setCellValue('A' . $fila, $detalle->nombreEquipo);
-
+            //Obtenemos los valores de copiaLocal y copiaNube, los convertimos a 'Sí' o 'No'
             $valorLocal = $detalle->copiaLocal ? 'Sí' : 'No';
             $valorNube = $detalle->copiaNube ? 'Sí' : 'No';
-
+            //Contamos los totales de copias locales y en la nube
             if ($valorLocal === 'Sí') $totalLocalSi++;
             else $totalLocalNo++;
             if ($valorNube === 'Sí') $totalNubeSi++;
             else $totalNubeNo++;
-
+            //Rellenamos el resto de las celdas: $valorLocal && $valorNube = Si || No, Observaciones = Cadena de texto, si no hay texto estará vacía
             $sheet->setCellValue('B' . $fila, $valorLocal);
             $sheet->setCellValue('C' . $fila, $valorNube);
             $sheet->setCellValue('D' . $fila, $detalle->observaciones ?: '');
-
+            //Aumentamos la fila para la siguiente iteración
+            //De esta forma, la siguiente iteración escribirá en la siguiente fila
             $fila++;
         }
 
         $ultimaFila = $fila - 1;
 
-        // Formato condicional para columnas B y C
+        // FORMATO CONDICIONAL PARA COLUMNAS B (Copia Local) Y C (Copia Nube)
+        //PhpSpreadsheet espera que la condición de texto vaya entre comillas. Por eso se pasa la cadena con comillas internas.
+        //Condicional para cuando halla un 'Si'
         $condicionalSi = new \PhpOffice\PhpSpreadsheet\Style\Conditional();
         $condicionalSi->setConditionType(\PhpOffice\PhpSpreadsheet\Style\Conditional::CONDITION_CELLIS)
             ->setOperatorType(\PhpOffice\PhpSpreadsheet\Style\Conditional::OPERATOR_EQUAL)
-            ->addCondition('"Sí"')
-            ->getStyle()->getFont()->getColor()->setRGB('008000'); // Verde
+            ->addCondition('"Sí"');
+        $condicionalSi->getStyle()->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('00FF00'); // Fondo verde
+        $condicionalSi->getStyle()->getFont()->getColor()->setRGB('000000'); // Texto negro
 
         $condicionalNo = new \PhpOffice\PhpSpreadsheet\Style\Conditional();
         $condicionalNo->setConditionType(\PhpOffice\PhpSpreadsheet\Style\Conditional::CONDITION_CELLIS)
             ->setOperatorType(\PhpOffice\PhpSpreadsheet\Style\Conditional::OPERATOR_EQUAL)
-            ->addCondition('"No"')
-            ->getStyle()->getFont()->getColor()->setRGB('FF0000'); // Rojo
+            ->addCondition('"No"');
+        $condicionalNo->getStyle()->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+            ->getStartColor()->setRGB('FF0000'); // Fondo rojo
+        $condicionalNo->getStyle()->getFont()->getColor()->setRGB('000000'); // Texto negro
 
+        //Le pasamos los estilos condicionales a todas las filas de las columnas B Y C
         $sheet->getStyle("B2:B{$ultimaFila}")->setConditionalStyles([$condicionalSi, $condicionalNo]);
         $sheet->getStyle("C2:C{$ultimaFila}")->setConditionalStyles([$condicionalSi, $condicionalNo]);
 
-        // Resumen con totales
+
+        // RESUMEN CON TOTALES
         $filaResumen = $ultimaFila + 2;
         $sheet->setCellValue("A{$filaResumen}", 'Totales:');
         $sheet->setCellValue("B{$filaResumen}", "Local Sí: {$totalLocalSi}");
@@ -286,7 +349,8 @@ class IncrementalInformesController
         $sheet->setCellValue("C{$filaResumen}", "Nube Sí: {$totalNubeSi}");
         $sheet->setCellValue("C" . ($filaResumen + 1), "Nube No: {$totalNubeNo}");
 
-        // Bordes en tabla de datos
+        // BORDES PARA LA TABLA CON LOS DATOS
+        //Aplicamos todos los bordes y le asignamos el color negro
         $sheet->getStyle("A1:D{$ultimaFila}")->applyFromArray([
             'borders' => [
                 'allBorders' => [
@@ -296,15 +360,18 @@ class IncrementalInformesController
             ]
         ]);
 
-        // Auto filtro (solo encabezado)
+        // AUTO FILTRO
+        //Activamos el autofiltro para las columnas A a D
         $sheet->setAutoFilter('A1:D1');
 
-        // Autoajustar columnas
+        // AUTOAJUSTE DE COLUMNAS
+        //Ajustamos automáticamente el ancho de las columnas A a D
         foreach (range('A', 'D') as $col) {
+            //getColumnDimension obtiene la dimensión de la columna y setAutoSize ajusta el ancho automáticamente
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
-        // Descargar archivo
+        // DESCARGAR EL ARCHIVO
         $writer = new Xlsx($spreadsheet);
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header("Content-Disposition: attachment;filename=\"{$nombreArchivo}\"");
