@@ -40,7 +40,7 @@ function manejarEnvio() {
         });
     });
 }
-//Validar dias domingos
+//Validar dias domingos en el input type date
 const inputFecha = document.querySelector('.formularioFiltro__date');
 inputFecha.addEventListener('change', function(){
     //Convertimos el value de inputFecha en un objeto Date para

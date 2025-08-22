@@ -30,8 +30,11 @@ $router->post('/incremental', [IncrementalController::class, 'incremental']);
 
 //Incremental Informes
 $router->get('/incremental-descargar-diaria', [IncrementalInformesController::class, 'get']);
+$router->get('/incremental-descargar-mensual', [IncrementalInformesController::class, 'getM']);
 $router->get('/descargar-iid', [IncrementalInformesController::class, 'exportarPDF']);
+$router->get('/descargar-iim', [IncrementalInformesController::class, 'exportarPDFM']);
 $router->get('/descargar-iide', [IncrementalInformesController::class, 'exportarExcel']);
+$router->get('/descargar-iieM', [IncrementalInformesController::class, 'exportarExcelM']);
 
 // Completa
 $router->get('/completa', [CompletaController::class, 'completa']);
