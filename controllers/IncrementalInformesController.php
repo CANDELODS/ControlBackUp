@@ -148,7 +148,8 @@ class IncrementalInformesController
     }
 
     // Obtenemos todos los detalles (luego se puede optimizar a "solo del mes")
-    $copiasDetalle = CopiasDetalle::all();
+    $copiasDetalle = CopiasDetalle::allWhereMes($mes, 1);
+    // debuguear($copiasDetalle);
 
     $router->render('incremental/descargarM', [
         'titulo' => 'Incremental - Descargar Mensual',

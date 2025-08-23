@@ -281,98 +281,115 @@ class ActiveRecord
     }
 
     //MESES
-   // Contar meses distintos de una columna (ej: fecha)
-   //En pocas palabras cuenta cuántos meses distintos tienen registros incrementales.
-public static function totalMeses($columna, $whereCol = null, $whereVal = null) {
-    $columna = self::$db->escape_string($columna);
+    // Contar meses distintos de una columna (ej: fecha)
+    //En pocas palabras cuenta cuántos meses distintos tienen registros incrementales.
+    public static function totalMeses($columna, $whereCol = null, $whereVal = null)
+    {
+        $columna = self::$db->escape_string($columna);
 
-    $query = "SELECT COUNT(DISTINCT DATE_FORMAT($columna, '%Y-%m')) AS total
+        $query = "SELECT COUNT(DISTINCT DATE_FORMAT($columna, '%Y-%m')) AS total
               FROM " . static::$tabla;
 
-    if ($whereCol && $whereVal !== null) {
-        $whereCol = self::$db->escape_string($whereCol);
-        $whereVal = self::$db->escape_string($whereVal);
-        $query .= " WHERE $whereCol = '{$whereVal}'";
+        if ($whereCol && $whereVal !== null) {
+            $whereCol = self::$db->escape_string($whereCol);
+            $whereVal = self::$db->escape_string($whereVal);
+            $query .= " WHERE $whereCol = '{$whereVal}'";
+        }
+
+        $res = self::$db->query($query);
+        $row = $res->fetch_assoc();
+        return (int)($row['total'] ?? 0);
     }
 
-    $res = self::$db->query($query);
-    $row = $res->fetch_assoc();
-    return (int)($row['total'] ?? 0);
-}
+    //Obtener todos los copiaDetalle de un mes específico
+    public static function allWhereMes($mes, $tipoDeCopia)
+    {
+        $query = "SELECT d.*
+            FROM copiasDetalle d
+            INNER JOIN copiasEncabezado e ON d.idCopiasEncabezado = e.id
+            WHERE e.tipoDeCopia = {$tipoDeCopia}
+            AND DATE_FORMAT(e.fecha, '%Y-%m') = '{$mes}'";
 
-// Obtener meses paginados (agrupados por mes)
-public static function mesesPaginados($columna, $limite, $offset, $whereCol = null, $whereVal = null, $orden = 'ASC') {
-    $columna = self::$db->escape_string($columna);
-    $orden   = strtoupper($orden) === 'DESC' ? 'DESC' : 'ASC';
-    $limite  = (int) $limite;
-    $offset  = (int) $offset;
+        $resultado = self::consultarSQL($query);
+        return $resultado;
+    }
 
-    $query = "SELECT 
+    // Obtener meses paginados (agrupados por mes)
+    public static function mesesPaginados($columna, $limite, $offset, $whereCol = null, $whereVal = null, $orden = 'ASC')
+    {
+        $columna = self::$db->escape_string($columna);
+        $orden   = strtoupper($orden) === 'DESC' ? 'DESC' : 'ASC';
+        $limite  = (int) $limite;
+        $offset  = (int) $offset;
+
+        $query = "SELECT 
                 MIN(id) AS id,
                 DATE_FORMAT($columna, '%Y-%m') AS fecha,
                 tipoDeCopia
               FROM " . static::$tabla;
 
-    if ($whereCol && $whereVal !== null) {
-        $whereCol = self::$db->escape_string($whereCol);
-        $whereVal = self::$db->escape_string($whereVal);
-        $query .= " WHERE $whereCol = '{$whereVal}'";
-    }
+        if ($whereCol && $whereVal !== null) {
+            $whereCol = self::$db->escape_string($whereCol);
+            $whereVal = self::$db->escape_string($whereVal);
+            $query .= " WHERE $whereCol = '{$whereVal}'";
+        }
 
-    $query .= " GROUP BY DATE_FORMAT($columna, '%Y-%m'), tipoDeCopia
+        $query .= " GROUP BY DATE_FORMAT($columna, '%Y-%m'), tipoDeCopia
                 ORDER BY fecha {$orden}
                 LIMIT {$limite} OFFSET {$offset}";
 
-    return self::consultarSQL($query);
-}
+        return self::consultarSQL($query);
+    }
 
-// Total por mes específico (ej: 2025-07)
-public static function totalPorMes($columna, $mes, $whereCol = null, $whereVal = null) {
-    $columna = self::$db->escape_string($columna);
-    $mes     = self::$db->escape_string($mes);
+    // Total por mes específico (ej: 2025-07)
+    public static function totalPorMes($columna, $mes, $whereCol = null, $whereVal = null)
+    {
+        $columna = self::$db->escape_string($columna);
+        $mes     = self::$db->escape_string($mes);
 
-    $query = "SELECT COUNT(DISTINCT DATE_FORMAT($columna, '%Y-%m')) AS total
+        $query = "SELECT COUNT(DISTINCT DATE_FORMAT($columna, '%Y-%m')) AS total
               FROM " . static::$tabla . "
               WHERE DATE_FORMAT($columna, '%Y-%m') = '{$mes}'";
 
-    if ($whereCol && $whereVal !== null) {
-        $whereCol = self::$db->escape_string($whereCol);
-        $whereVal = self::$db->escape_string($whereVal);
-        $query .= " AND $whereCol = '{$whereVal}'";
+        if ($whereCol && $whereVal !== null) {
+            $whereCol = self::$db->escape_string($whereCol);
+            $whereVal = self::$db->escape_string($whereVal);
+            $query .= " AND $whereCol = '{$whereVal}'";
+        }
+
+        $res = self::$db->query($query);
+        $row = $res->fetch_assoc();
+        return (int)($row['total'] ?? 0);
     }
 
-    $res = self::$db->query($query);
-    $row = $res->fetch_assoc();
-    return (int)($row['total'] ?? 0);
-}
+    // Obtener registros de un mes específico (agrupados)
+    public static function porMesPaginado($columna, $mes, $limite, $offset, $whereCol = null, $whereVal = null, $orden = 'ASC')
+    {
+        $columna = self::$db->escape_string($columna);
+        $mes     = self::$db->escape_string($mes);
+        $orden   = strtoupper($orden) === 'DESC' ? 'DESC' : 'ASC';
+        $limite  = (int) $limite;
+        $offset  = (int) $offset;
 
-// Obtener registros de un mes específico (agrupados)
-public static function porMesPaginado($columna, $mes, $limite, $offset, $whereCol = null, $whereVal = null, $orden = 'ASC') {
-    $columna = self::$db->escape_string($columna);
-    $mes     = self::$db->escape_string($mes);
-    $orden   = strtoupper($orden) === 'DESC' ? 'DESC' : 'ASC';
-    $limite  = (int) $limite;
-    $offset  = (int) $offset;
-
-    $query = "SELECT 
+        $query = "SELECT 
                 MIN(id) AS id,
                 DATE_FORMAT($columna, '%Y-%m') AS fecha,
                 tipoDeCopia
               FROM " . static::$tabla . "
               WHERE DATE_FORMAT($columna, '%Y-%m') = '{$mes}'";
 
-    if ($whereCol && $whereVal !== null) {
-        $whereCol = self::$db->escape_string($whereCol);
-        $whereVal = self::$db->escape_string($whereVal);
-        $query .= " AND $whereCol = '{$whereVal}'";
-    }
+        if ($whereCol && $whereVal !== null) {
+            $whereCol = self::$db->escape_string($whereCol);
+            $whereVal = self::$db->escape_string($whereVal);
+            $query .= " AND $whereCol = '{$whereVal}'";
+        }
 
-    $query .= " GROUP BY DATE_FORMAT($columna, '%Y-%m'), tipoDeCopia
+        $query .= " GROUP BY DATE_FORMAT($columna, '%Y-%m'), tipoDeCopia
                 ORDER BY fecha {$orden}
                 LIMIT {$limite} OFFSET {$offset}";
 
-    return self::consultarSQL($query);
-}
+        return self::consultarSQL($query);
+    }
 
 
 
