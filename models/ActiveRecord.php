@@ -244,10 +244,10 @@ class ActiveRecord
     }
 
     // Búsqueda Where con LIKE (ideal para filtros por fecha o texto parcial)
-    public static function whereLike($columna, $valor)
+    public static function whereLike($columna, $valor, $copia = 1)
     {
         $valor = self::$db->escape_string($valor);
-        $query = "SELECT * FROM " . static::$tabla . " WHERE ${columna} LIKE '%${valor}%'";
+        $query = "SELECT * FROM " . static::$tabla . " WHERE ${columna} LIKE '%${valor}%' AND tipoDeCopia = ${copia}";
         $resultado = self::consultarSQL($query);
         return $resultado;
     }

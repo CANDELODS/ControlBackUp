@@ -92,74 +92,74 @@ class IncrementalInformesController
     }
 
     //Usado en la vista de descargarM.php
-   public static function getM(Router $router)
-{
-    if (!isAuth()) {
-        header('Location: /login');
-        exit;
-    }
-
-    // Obtenemos el mes de la URL
-    $mes = $_GET['mes'] ?? '';
-
-    // Página actual
-    $pagina_actual = $_GET['page'] ?? 1;
-    $pagina_actual = filter_var($pagina_actual, FILTER_VALIDATE_INT);
-
-    if (!$pagina_actual || $pagina_actual < 1) {
-        header('Location: /incremental-descargar-mensual?page=1');
-        exit;
-    }
-
-    $registros_por_pagina = 8;
-    $sin_resultados = false;
-
-    if ($mes) {
-        // Cantidad de registros agrupados por mes
-        $total_registros = CopiasEncabezado::totalPorMes('fecha', $mes, 'tipoDeCopia', 1);
-
-        if (!$total_registros) {
-            // No hay resultados para el mes seleccionado
-            $sin_resultados = true;
-            $copias = []; 
-            $paginacion = null; 
-        } else {
-            // Sí hay registros
-            $paginacion = new Paginacion($pagina_actual, $registros_por_pagina, $total_registros);
-            $copias = CopiasEncabezado::porMesPaginado('fecha', $mes, $registros_por_pagina, $paginacion->offset(), 'tipoDeCopia', 1);
+    public static function getM(Router $router)
+    {
+        if (!isAuth()) {
+            header('Location: /login');
+            exit;
         }
-    } else {
-        // Si no se seleccionó mes, se muestran todos los meses
-        $total_registros = CopiasEncabezado::totalMeses('fecha', 'tipoDeCopia', 1);
-        $paginacion = new Paginacion($pagina_actual, $registros_por_pagina, $total_registros);
-        $copias = CopiasEncabezado::mesesPaginados('fecha', $registros_por_pagina, $paginacion->offset(), 'tipoDeCopia', 1);
+
+        // Obtenemos el mes de la URL
+        $mes = $_GET['mes'] ?? '';
+
+        // Página actual
+        $pagina_actual = $_GET['page'] ?? 1;
+        $pagina_actual = filter_var($pagina_actual, FILTER_VALIDATE_INT);
+
+        if (!$pagina_actual || $pagina_actual < 1) {
+            header('Location: /incremental-descargar-mensual?page=1');
+            exit;
+        }
+
+        $registros_por_pagina = 8;
+        $sin_resultados = false;
+
+        if ($mes) {
+            // Cantidad de registros agrupados por mes
+            $total_registros = CopiasEncabezado::totalPorMes('fecha', $mes, 'tipoDeCopia', 1);
+
+            if (!$total_registros) {
+                // No hay resultados para el mes seleccionado
+                $sin_resultados = true;
+                $copias = [];
+                $paginacion = null;
+            } else {
+                // Sí hay registros
+                $paginacion = new Paginacion($pagina_actual, $registros_por_pagina, $total_registros);
+                $copias = CopiasEncabezado::porMesPaginado('fecha', $mes, $registros_por_pagina, $paginacion->offset(), 'tipoDeCopia', 1);
+            }
+        } else {
+            // Si no se seleccionó mes, se muestran todos los meses
+            $total_registros = CopiasEncabezado::totalMeses('fecha', 'tipoDeCopia', 1);
+            $paginacion = new Paginacion($pagina_actual, $registros_por_pagina, $total_registros);
+            $copias = CopiasEncabezado::mesesPaginados('fecha', $registros_por_pagina, $paginacion->offset(), 'tipoDeCopia', 1);
+        }
+
+        // Validación de página fuera de rango
+        if ($paginacion && $paginacion->totalPaginas() < $pagina_actual) {
+            header('Location: /incremental-descargar-mensual?page=1');
+            exit;
+        }
+
+        //Convertimos los 0 y 1 de la columna tipoDeCopia en strings para usarlos en la vista
+        foreach ($copias as $copia) {
+            //Si hay algo (Por ejemplo 1) será incremental, de lo contrario (0) será completa
+            $copia->tipoDeCopia = $copia->tipoDeCopia ? 'Incremental' : 'Completa';
+        }
+
+        // Obtenemos todos los detalles (luego se puede optimizar a "solo del mes")
+        $copiasDetalle = CopiasDetalle::allWhereMes($mes, 1);
+        // debuguear($copiasDetalle);
+
+        $router->render('incremental/descargarM', [
+            'titulo' => 'Incremental - Descargar Mensual',
+            'alertas' => Usuario::getAlertas(),
+            'copias' => $copias,
+            'copiasDetalle' => $copiasDetalle,
+            'paginacion' => $paginacion ? $paginacion->paginacion() : null,
+            'sin_resultados' => $sin_resultados
+        ]);
     }
-
-    // Validación de página fuera de rango
-    if ($paginacion && $paginacion->totalPaginas() < $pagina_actual) {
-        header('Location: /incremental-descargar-mensual?page=1');
-        exit;
-    }
-
-    //Convertimos los 0 y 1 de la columna tipoDeCopia en strings para usarlos en la vista
-    foreach ($copias as $copia) {
-        //Si hay algo (Por ejemplo 1) será incremental, de lo contrario (0) será completa
-        $copia->tipoDeCopia = $copia->tipoDeCopia ? 'Incremental' : 'Completa';
-    }
-
-    // Obtenemos todos los detalles (luego se puede optimizar a "solo del mes")
-    $copiasDetalle = CopiasDetalle::allWhereMes($mes, 1);
-    // debuguear($copiasDetalle);
-
-    $router->render('incremental/descargarM', [
-        'titulo' => 'Incremental - Descargar Mensual',
-        'alertas' => Usuario::getAlertas(),
-        'copias' => $copias,
-        'copiasDetalle' => $copiasDetalle,
-        'paginacion' => $paginacion ? $paginacion->paginacion() : null,
-        'sin_resultados' => $sin_resultados
-    ]);
-}
 
 
 
@@ -179,7 +179,7 @@ class IncrementalInformesController
             exit;
         }
         // Buscamos la copiaEncabezado por fecha
-        $copias = CopiasEncabezado::whereLike('fecha', $fecha);
+        $copias = CopiasEncabezado::whereLike('fecha', $fecha, 1);
         // Si no hay copias, redirigir o mostrar mensaje
         if (empty($copias)) {
             echo "<script>alert('No se encontraron registros para la fecha seleccionada.');window.location.href='/incremental-descargar-diaria';</script>";
@@ -310,20 +310,18 @@ class IncrementalInformesController
             exit;
         }
         // Buscamos la copiaEncabezado por fecha
-        $copias = CopiasEncabezado::whereLike('fecha', $fecha);
+        $copias = CopiasEncabezado::whereLike('fecha', $fecha, 1);
         // Si no hay copias, redirigir o mostrar mensaje
         if (empty($copias)) {
             echo "<script>alert('No se encontraron registros para la fecha seleccionada.');window.location.href='/incremental-descargar-diaria';</script>";
             exit;
         }
-        //Extraemos el Id de la copiaEncabezado para usarlo en la consulta de detalles
-        $ids = array_map(fn($copia) => $copia->id, $copias);
-        $id = $ids[0];
 
-        // Obtenemos los copiaDetalle relacionados con la copiaEncabezado, ordenados por nombre de equipo
-        //El método allWhere filtra los detalles por el id de la copiaEncabezado
-        //1er parámetro: Nombre de la columna B, 2do parámetro: Tipo de copia, 3er parámetro: id de la copiaEncabezado, 4to parámetro: orden
-        $detalles = CopiasDetalle::allWhere('copiasencabezado', 1, $id, 'ASC');
+        // Obtenemos los copiaDetalle relacionados con el mes seleccionado, ordenados por nombre de equipo
+        //El método allWhereMes filtra los detalles por el mes de la copiaEncabezado
+        //1er parámetro: Mes (ejemplo: '2025-06'), 2do parámetro: Tipo de copia (1 = Incremental, 0 = Completa)
+        $detalles = CopiasDetalle::allWhereMes($fecha, 1);
+
         // AÑADIR NOMBRES DE EQUIPOS
         foreach ($detalles as $detalle) {
             //Se Crea Una LLave Llamada equipos Dentro Del Objeto De copiasDetalle Y La Buscamos Por Su Id(En La Tabla De Equipos)
@@ -332,98 +330,76 @@ class IncrementalInformesController
 
         // ORDENAR ALFABETICAMENTE POR NOMBRE DE EQUIPO
         usort($detalles, fn($a, $b) => strcmp($a->equipos->nombreEquipo, $b->equipos->nombreEquipo));
-
-        // TOTALES
-        $totalLocalSi = $totalLocalNo = $totalNubeSi = $totalNubeNo = 0;
-
-        // Instanciamos TCPDF
-        $pdf = new \TCPDF();
-        $pdf->SetCreator(PDF_CREATOR);
-        //Autor del documento
-        $pdf->SetAuthor('TI Ladrillera Melendez SA');
-        // Título del documento
-        $pdf->SetTitle("Reporte Mensual - Incremental $fecha");
-        //Márgenes del PDF (izquierda, arriba, derecha).
-        $pdf->SetMargins(10, 10, 10, true);
-        //Agrega una página en blanco.
-        $pdf->AddPage();
-
-        // TÍTULO
-        //Fuente, negrita y tamaño de letra
-        $pdf->SetFont('helvetica', 'B', 16);
-        //Crear una celda (una línea de texto).
-        //0: Ancho de la celda (0 = Automático), 10: Alto de la celda, Texto, 0: Borde, 1: Salto de línea,
-        //C: Alineación (C = Centrado)
-        $pdf->Cell(0, 10, "Reporte Mensual - Incremental ($fecha)", 0, 1, 'C');
-
-        // Espacio
-        $pdf->Ln(5);
-        $pdf->SetFont('helvetica', '', 10);
-
-        // ENCABEZADOS DE LA TABLA PRINCIPAL
-        $html = '<table border="1" cellspacing="0" cellpadding="4">
-            <thead>
-                <tr style="background-color:#f2f2f2; font-weight:bold; text-align:center;">
-                    <th>Equipo</th>
-                    <th>Local</th>
-                    <th>Nube</th>
-                    <th>Observaciones</th>
-                </tr>
-            </thead>
-            <tbody>';
-
+        // Procesar datos por equipo
+        $resumen = [];
         foreach ($detalles as $detalle) {
             $equipo = $detalle->equipos->nombreEquipo ?? '';
-            $local = $detalle->copiaLocal == '1' ? 'Sí' : 'No';
-            $nube = $detalle->copiaNube == '1' ? 'Sí' : 'No';
-            $observaciones = htmlspecialchars($detalle->observaciones ?? '', ENT_QUOTES);
 
-            // Contar totales
-            if ($local === 'Sí') $totalLocalSi++;
-            else $totalLocalNo++;
-            if ($nube === 'Sí') $totalNubeSi++;
-            else $totalNubeNo++;
+            if (!isset($resumen[$equipo])) {
+                $resumen[$equipo] = [
+                    'local' => 0,
+                    'nube' => 0,
+                    'total' => 0,
+                    'evaluacion' => ''
+                ];
+            }
+            // Contar copias
+            if ($detalle->copiaLocal == 1) {
+                $resumen[$equipo]['local']++;
+            }
+            if ($detalle->copiaNube == 1) {
+                $resumen[$equipo]['nube']++;
+            }
 
-            // Colores condicionales
-            $colorLocal = $local === 'Sí' ? '#14b134ff' : '#cf0606ff';
-            $colorNube = $nube === 'Sí' ? '#14b134ff' : '#cf0606ff';
-
-            //LLENADO DE TABLA
-            $html .= "<tr>
-                    <td>{$equipo}</td>
-                    <td style='background-color:{$colorLocal}; color:black; text-align:center;'>{$local}</td>
-                    <td style='background-color:{$colorNube}; color:black; text-align:center;'>{$nube}</td>
-                    <td>" . ($observaciones ?: '') . "</td>
-                </tr>";
+            // Total = suma de local + nube
+            $resumen[$equipo]['total'] = $resumen[$equipo]['local'] + $resumen[$equipo]['nube'];
         }
 
-        $html .= '</tbody></table>';
+        // Evaluar estándares
+        foreach ($resumen as $equipo => &$data) {
+            $total = $data['total'];
+            if ($total >= 20) {
+                $data['evaluacion'] = "Excelente";
+            } elseif ($total >= 10) {
+                $data['evaluacion'] = "Bien";
+            } else {
+                $data['evaluacion'] = "Mal";
+            }
+        }
 
-        // TABLA DE TOTALES
-        $html .= '<br><br>
-    <table border="1" cellpadding="4">
-        <tr style="background-color:#f2f2f2; font-weight:bold; text-align:center;">
-            <th colspan="2">Totales</th>
-        </tr>
-        <tr>
-            <td>Local Sí:</td><td>' . $totalLocalSi . '</td>
-        </tr>
-        <tr>
-            <td>Local No:</td><td>' . $totalLocalNo . '</td>
-        </tr>
-        <tr>
-            <td>Nube Sí:</td><td>' . $totalNubeSi . '</td>
-        </tr>
-        <tr>
-            <td>Nube No:</td><td>' . $totalNubeNo . '</td>
-        </tr>
-    </table>';
+        // -------------------
+        // Generar PDF con TCPDF
+        // -------------------
+        $pdf = new \TCPDF();
+        $pdf->AddPage();
 
-        // Agregamos el contenido al PDF (Convierte el HTML de la tabla a PDF)
-        $pdf->writeHTML($html, true, false, true, false, '');
-        // Mostramos o descargamos
-        $pdf->Output("Reporte Mensual - Incremental {$fecha}.pdf", 'I'); // 'I' para mostrar en navegador, 'D' para forzar descarga
+        // Título
+        $pdf->SetFont('helvetica', 'B', 14);
+        $pdf->Cell(0, 10, "Informe Mensual Incremental - $fecha", 0, 1, 'C');
 
+        $pdf->Ln(5);
+
+        // Encabezados tabla
+        $pdf->SetFont('helvetica', 'B', 10);
+        $pdf->Cell(50, 8, "Equipo", 1, 0, 'C');
+        $pdf->Cell(30, 8, "Local", 1, 0, 'C');
+        $pdf->Cell(30, 8, "Nube", 1, 0, 'C');
+        $pdf->Cell(30, 8, "Total", 1, 0, 'C');
+        $pdf->Cell(40, 8, "Evaluación", 1, 1, 'C');
+
+        // Filas
+        $pdf->SetFont('helvetica', '', 10);
+        foreach ($resumen as $equipo => $data) {
+            $pdf->Cell(50, 8, $equipo, 1);
+            $pdf->Cell(30, 8, $data['local'], 1, 0, 'C');
+            $pdf->Cell(30, 8, $data['nube'], 1, 0, 'C');
+            $pdf->Cell(30, 8, $data['total'], 1, 0, 'C');
+            $pdf->Cell(40, 8, $data['evaluacion'], 1, 1, 'C');
+        }
+
+        // Mostrar PDF en el navegador
+        $pdf->Output("informe_mensual_incremental_$fecha.pdf", "I");
+        exit;
     }
 
     //Exportar Excel de copias diarias incrementales
@@ -442,7 +418,7 @@ class IncrementalInformesController
         }
 
         // Buscar copias encabezado por fecha
-        $copias = CopiasEncabezado::whereLike('fecha', $fecha);
+        $copias = CopiasEncabezado::whereLike('fecha', $fecha, 1);
         if (empty($copias)) {
             echo "<script>alert('No se encontraron registros para la fecha seleccionada.');window.location.href='/incremental-descargar-diaria';</script>";
             exit;
