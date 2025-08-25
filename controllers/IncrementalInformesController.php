@@ -311,96 +311,190 @@ class IncrementalInformesController
         }
         // Buscamos la copiaEncabezado por fecha
         $copias = CopiasEncabezado::whereLike('fecha', $fecha, 1);
-        // Si no hay copias, redirigir o mostrar mensaje
         if (empty($copias)) {
             echo "<script>alert('No se encontraron registros para la fecha seleccionada.');window.location.href='/incremental-descargar-diaria';</script>";
             exit;
         }
 
-        // Obtenemos los copiaDetalle relacionados con el mes seleccionado, ordenados por nombre de equipo
-        //El método allWhereMes filtra los detalles por el mes de la copiaEncabezado
-        //1er parámetro: Mes (ejemplo: '2025-06'), 2do parámetro: Tipo de copia (1 = Incremental, 0 = Completa)
+        // Obtenemos los copiaDetalle relacionados con el mes seleccionado
         $detalles = CopiasDetalle::allWhereMes($fecha, 1);
 
-        // AÑADIR NOMBRES DE EQUIPOS
         foreach ($detalles as $detalle) {
-            //Se Crea Una LLave Llamada equipos Dentro Del Objeto De copiasDetalle Y La Buscamos Por Su Id(En La Tabla De Equipos)
             $detalle->equipos = Equipos::find($detalle->idEquipos);
         }
 
-        // ORDENAR ALFABETICAMENTE POR NOMBRE DE EQUIPO
+        // Ordenar por nombre de equipo
         usort($detalles, fn($a, $b) => strcmp($a->equipos->nombreEquipo, $b->equipos->nombreEquipo));
-        // Procesar datos por equipo
+
+        // Agregar al resumen
         $resumen = [];
         foreach ($detalles as $detalle) {
-            $equipo = $detalle->equipos->nombreEquipo ?? '';
+            $equipoNombre = $detalle->equipos->nombreEquipo ?? '';
 
-            if (!isset($resumen[$equipo])) {
-                $resumen[$equipo] = [
-                    'local' => 0,
-                    'nube' => 0,
-                    'total' => 0,
-                    'evaluacion' => ''
+            if (!isset($resumen[$equipoNombre])) {
+                $resumen[$equipoNombre] = [
+                    'local'             => 0,
+                    'nube'              => 0,
+                    'total'             => 0,
+                    'evaluacion'        => '',
+                    // flags de habilitación (desde tabla equipos)
+                    'habilitado_local'  => (int)($detalle->equipos->local ?? 0),
+                    'habilitado_nube'   => (int)($detalle->equipos->nube ?? 0),
                 ];
             }
-            // Contar copias
+
             if ($detalle->copiaLocal == 1) {
-                $resumen[$equipo]['local']++;
+                $resumen[$equipoNombre]['local']++;
             }
             if ($detalle->copiaNube == 1) {
-                $resumen[$equipo]['nube']++;
+                $resumen[$equipoNombre]['nube']++;
             }
 
-            // Total = suma de local + nube
-            $resumen[$equipo]['total'] = $resumen[$equipo]['local'] + $resumen[$equipo]['nube'];
+            $resumen[$equipoNombre]['total'] =
+                $resumen[$equipoNombre]['local'] + $resumen[$equipoNombre]['nube'];
         }
 
-        // Evaluar estándares
-        foreach ($resumen as $equipo => &$data) {
-            $total = $data['total'];
-            if ($total >= 20) {
-                $data['evaluacion'] = "Excelente";
-            } elseif ($total >= 10) {
-                $data['evaluacion'] = "Bien";
-            } else {
-                $data['evaluacion'] = "Mal";
-            }
+        // Evaluación por total mensual
+        foreach ($resumen as $eq => &$d) {
+            $t = $d['total'];
+            $d['evaluacion'] = $t >= 20 ? 'Excelente' : ($t >= 10 ? 'Bien' : 'Mal');
         }
+        unset($d);
 
-        // -------------------
-        // Generar PDF con TCPDF
-        // -------------------
+        // ======== Estadísticas (filtrando por habilitación) ========
+        // Local
+        $ordenLocal = array_filter($resumen, fn($d) => !empty($d['habilitado_local']));
+        uasort($ordenLocal, fn($a, $b) => $b['local'] <=> $a['local']);
+
+        // Nube
+        $ordenNube = array_filter($resumen, fn($d) => !empty($d['habilitado_nube']));
+        uasort($ordenNube, fn($a, $b) => $b['nube'] <=> $a['nube']);
+
+        // Extremos
+        $masLocal   = !empty($ordenLocal) ? array_key_first($ordenLocal) : null;
+        $menosLocal = !empty($ordenLocal) ? array_key_last($ordenLocal)  : null;
+
+        $masNube    = !empty($ordenNube) ? array_key_first($ordenNube)   : null;
+        $menosNube  = !empty($ordenNube) ? array_key_last($ordenNube)    : null;
+
+        // Top/Bottom 3 (preservar claves)
+        $top3Local     = array_slice($ordenLocal, 0, 3, true);
+        $bottom3Local  = array_slice($ordenLocal, -3, 3, true);
+
+        $top3Nube      = array_slice($ordenNube, 0, 3, true);
+        $bottom3Nube   = array_slice($ordenNube, -3, 3, true);
+
+        // Totales (lo realizado, sin filtrar)
+        $totalLocal  = array_sum(array_column($resumen, 'local'));
+        $totalNube   = array_sum(array_column($resumen, 'nube'));
+        $totalGlobal = $totalLocal + $totalNube;
+
+        // ================= PDF =================
         $pdf = new \TCPDF();
         $pdf->AddPage();
 
-        // Título
         $pdf->SetFont('helvetica', 'B', 14);
         $pdf->Cell(0, 10, "Informe Mensual Incremental - $fecha", 0, 1, 'C');
 
+        // Tabla principal
+        $html = '<table border="1" cellpadding="4">
+                <tr>
+                    <th>Equipo</th>
+                    <th>Local</th>
+                    <th>Nube</th>
+                    <th>Total</th>
+                    <th>Evaluación</th>
+                </tr>';
+        foreach ($resumen as $equipo => $datos) {
+            $color = ($datos['evaluacion'] == 'Mal') ? ' style="background-color:#f8d7da;"'
+                : (($datos['evaluacion'] == 'Bien') ? ' style="background-color:#fff3cd;"'
+                    : ' style="background-color:#d4edda;"');
+            $html .= "<tr>
+                    <td>{$equipo}</td>
+                    <td>{$datos['local']}</td>
+                    <td>{$datos['nube']}</td>
+                    <td>{$datos['total']}</td>
+                    <td{$color}>{$datos['evaluacion']}</td>
+                  </tr>";
+        }
+        $html .= '</table>';
+        $pdf->writeHTML($html);
+
+        // Resumen estadístico
+        $pdf->Ln(10);
+        $pdf->SetFont('helvetica', 'B', 12);
+        $pdf->Cell(0, 10, "Resumen Estadístico", 0, 1);
+
+        $masLocalTxt   = $masLocal   ? "$masLocal ({$resumen[$masLocal]['local']})"   : 'Sin equipos habilitados';
+        $menosLocalTxt = $menosLocal ? "$menosLocal ({$resumen[$menosLocal]['local']})" : 'Sin equipos habilitados';
+        $masNubeTxt    = $masNube    ? "$masNube ({$resumen[$masNube]['nube']})"      : 'Sin equipos habilitados';
+        $menosNubeTxt  = $menosNube  ? "$menosNube ({$resumen[$menosNube]['nube']})"  : 'Sin equipos habilitados';
+
+        $html = "
+    <ul>
+        <li><b>Total Local:</b> $totalLocal</li>
+        <li><b>Total Nube:</b> $totalNube</li>
+        <li><b>Total Global:</b> $totalGlobal</li>
+        <li><b>Más copias Local:</b> $masLocalTxt</li>
+        <li><b>Menos copias Local:</b> $menosLocalTxt</li>
+        <li><b>Más copias Nube:</b> $masNubeTxt</li>
+        <li><b>Menos copias Nube:</b> $menosNubeTxt</li>
+    </ul>";
+        $pdf->writeHTML($html);
+
+        // Listas Top/Bottom
         $pdf->Ln(5);
-
-        // Encabezados tabla
-        $pdf->SetFont('helvetica', 'B', 10);
-        $pdf->Cell(50, 8, "Equipo", 1, 0, 'C');
-        $pdf->Cell(30, 8, "Local", 1, 0, 'C');
-        $pdf->Cell(30, 8, "Nube", 1, 0, 'C');
-        $pdf->Cell(30, 8, "Total", 1, 0, 'C');
-        $pdf->Cell(40, 8, "Evaluación", 1, 1, 'C');
-
-        // Filas
-        $pdf->SetFont('helvetica', '', 10);
-        foreach ($resumen as $equipo => $data) {
-            $pdf->Cell(50, 8, $equipo, 1);
-            $pdf->Cell(30, 8, $data['local'], 1, 0, 'C');
-            $pdf->Cell(30, 8, $data['nube'], 1, 0, 'C');
-            $pdf->Cell(30, 8, $data['total'], 1, 0, 'C');
-            $pdf->Cell(40, 8, $data['evaluacion'], 1, 1, 'C');
+        $pdf->Cell(0, 10, "Top 3 Local", 0, 1);
+        if (empty($top3Local)) {
+            $pdf->Write(0, "Sin equipos habilitados para copias locales.", '', 0, '', true);
+        } else {
+            $html = '<ol>';
+            foreach ($top3Local as $eq => $d) {
+                $html .= "<li>$eq ({$d['local']})</li>";
+            }
+            $html .= '</ol>';
+            $pdf->writeHTML($html);
         }
 
-        // Mostrar PDF en el navegador
-        $pdf->Output("informe_mensual_incremental_$fecha.pdf", "I");
-        exit;
+        $pdf->Cell(0, 10, "Bottom 3 Local", 0, 1);
+        if (empty($bottom3Local)) {
+            $pdf->Write(0, "Sin equipos habilitados para copias locales.", '', 0, '', true);
+        } else {
+            $html = '<ol>';
+            foreach ($bottom3Local as $eq => $d) {
+                $html .= "<li>$eq ({$d['local']})</li>";
+            }
+            $html .= '</ol>';
+            $pdf->writeHTML($html);
+        }
+
+        $pdf->Cell(0, 10, "Top 3 Nube", 0, 1);
+        if (empty($top3Nube)) {
+            $pdf->Write(0, "Sin equipos habilitados para copias en nube.", '', 0, '', true);
+        } else {
+            $html = '<ol>';
+            foreach ($top3Nube as $eq => $d) {
+                $html .= "<li>$eq ({$d['nube']})</li>";
+            }
+            $html .= '</ol>';
+            $pdf->writeHTML($html);
+        }
+
+        $pdf->Cell(0, 10, "Bottom 3 Nube", 0, 1);
+        if (empty($bottom3Nube)) {
+            $pdf->Write(0, "Sin equipos habilitados para copias en nube.", '', 0, '', true);
+        } else {
+            $html = '<ol>';
+            foreach ($bottom3Nube as $eq => $d) {
+                $html .= "<li>$eq ({$d['nube']})</li>";
+            }
+            $html .= '</ol>';
+            $pdf->writeHTML($html);
+        }
+
+        $pdf->Output("Informe_Mensual_Incremental_$fecha.pdf", 'I');
     }
+
 
     //Exportar Excel de copias diarias incrementales
     public static function exportarExcel()
