@@ -56,7 +56,7 @@
                                     <i class="fa-solid fa-file-pdf"></i>
                                     PDF
                                 </a>
-                                <a class="table__accion table__accion--descargarExcel" href="descargar-iiem?fecha=<?php echo $copia->fecha; ?>">
+                                <a class="table__accion table__accion--descargarExcel" href="descargar-iieM?fecha=<?php echo $copia->fecha; ?>">
                                     <i class="fa-solid fa-file-excel"></i>
                                     EXCEL
                                 </a>
