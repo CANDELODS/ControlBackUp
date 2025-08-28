@@ -15,7 +15,7 @@ class IncrementalController
     {
         //Verificamos si el usuario está autenticado
         if (!isAuth()) {
-            header('Location: /login');
+            header('Location: /');
         }
         //Instanciamos los modelos
         $equipos = new Equipos;

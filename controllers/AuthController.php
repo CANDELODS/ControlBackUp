@@ -34,7 +34,7 @@ class AuthController
                         if (isAuth()) {
                             header('Location: /principal');
                         } else {
-                            header('Location: /login');
+                            header('Location: /');
                         }
                     } else {
                         Usuario::setAlerta('error', 'Password Incorrecto');

@@ -17,7 +17,7 @@
                         Descargar informe del
                         mes completo
                     </p>
-                    <a href="" class="informes__enlace informes__enlace--c">Descargar</a>
+                    <a href="/completo-descargar" class="informes__enlace informes__enlace--c">Descargar</a>
                 </div>
             </div>
         </div>

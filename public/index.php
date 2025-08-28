@@ -11,6 +11,7 @@ use Controllers\CopiasController;
 use Controllers\EquiposController;
 use Controllers\IncrementalController;
 use Controllers\IncrementalInformesController;
+use Controllers\InformeCompletoController;
 use Controllers\PrincipalController;
 
 $router = new Router();
@@ -44,6 +45,12 @@ $router->get('/descargar-icd', [CompletaInformesController::class, 'exportarPDF'
 $router->get('/descargar-icm', [CompletaInformesController::class, 'exportarPDFM']);
 $router->get('/descargar-icde', [CompletaInformesController::class, 'exportarExcel']);
 $router->get('/descargar-iceM', [CompletaInformesController::class, 'exportarExcelM']);
+
+//Informe Completo
+$router->get('/completo-descargar', [InformeCompletoController::class, 'get']);
+$router->get('/completo-dpdf', [InformeCompletoController::class, 'exportarPDF']);
+$router->get('/completo-dxls', [InformeCompletoController::class, 'exportarExcel']);
+
 
 // Completa
 $router->get('/completa', [CompletaController::class, 'completa']);

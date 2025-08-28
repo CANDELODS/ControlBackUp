@@ -14,7 +14,7 @@ class EquiposController
     {
         //Verificamos si el usuario está autenticado
         if (!isAuth()) {
-            header('Location: /login');
+            header('Location: /');
         }
         //PAGINAR
         //Obtenemos la página desde la URL y verificamos que sea un número y que no sea negativo
@@ -64,7 +64,7 @@ class EquiposController
     public static function crear(Router $router)
     {
         if (!isAuth()) {
-            header('Location: /login');
+            header('Location: /');
         }
         $alertas = [];
         //Instanciamos las áreas
@@ -100,7 +100,7 @@ class EquiposController
     public static function editar(Router $router)
     {
         if (!isAuth()) {
-            header('Location: /login');
+            header('Location: /');
         }
         $alertas = [];
         $areas = new Areas;
@@ -148,7 +148,7 @@ class EquiposController
     public static function eliminar(Router $router)
     {
         if (!isAuth()) {
-            header('Location: /login');
+            header('Location: /');
         }
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = $_POST['id'];

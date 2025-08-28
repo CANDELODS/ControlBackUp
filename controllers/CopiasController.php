@@ -15,7 +15,7 @@ class CopiasController
     public static function copias(Router $router)
     {
         if (!isAuth()) {
-            header('Location: /login');
+            header('Location: /');
         }
         //Obtenemos la fecha de la URL
         $fecha = $_GET['fecha'] ?? '';
@@ -85,7 +85,7 @@ class CopiasController
     public static function editar(Router $router)
     {
         if (!isAuth()) {
-            header('Location: /login');
+            header('Location: /');
             exit;
         }
 
@@ -170,7 +170,7 @@ class CopiasController
     public static function eliminar(Router $router)
     {
         if (!isAuth()) {
-            header('Location: /login');
+            header('Location: /');
         }
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = $_POST['id'];

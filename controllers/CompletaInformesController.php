@@ -23,7 +23,7 @@ class CompletaInformesController
     public static function get(Router $router)
     {
         if (!isAuth()) {
-            header('Location: /login');
+            header('Location: /');
         }
         //Obtenemos la fecha de la URL
         $fecha = $_GET['fecha'] ?? '';
@@ -95,7 +95,7 @@ class CompletaInformesController
     public static function getM(Router $router)
     {
         if (!isAuth()) {
-            header('Location: /login');
+            header('Location: /');
             exit;
         }
 
@@ -169,7 +169,7 @@ class CompletaInformesController
     public static function exportarPDF()
     {
         if (!isAuth()) {
-            header('Location: /login');
+            header('Location: /');
             exit;
         }
 
@@ -300,7 +300,7 @@ class CompletaInformesController
     public static function exportarPDFM()
     {
         if (!isAuth()) {
-            header('Location: /login');
+            header('Location: /');
             exit;
         }
 
@@ -517,7 +517,7 @@ class CompletaInformesController
     public static function exportarExcel()
     {
         if (!isAuth()) {
-            header('Location: /login');
+            header('Location: /');
             exit;
         }
 
@@ -679,7 +679,7 @@ class CompletaInformesController
     public static function exportarExcelM()
     {
         if (!isAuth()) {
-            header('Location: /login');
+            header('Location: /');
             exit;
         }
 
