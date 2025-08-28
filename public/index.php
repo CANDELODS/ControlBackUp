@@ -5,6 +5,7 @@ require_once __DIR__ . '/../includes/app.php';
 use MVC\Router;
 use Controllers\AuthController;
 use Controllers\CompletaController;
+use Controllers\CompletaInformesController;
 use Controllers\ConsejosController;
 use Controllers\CopiasController;
 use Controllers\EquiposController;
@@ -35,6 +36,14 @@ $router->get('/descargar-iid', [IncrementalInformesController::class, 'exportarP
 $router->get('/descargar-iim', [IncrementalInformesController::class, 'exportarPDFM']);
 $router->get('/descargar-iide', [IncrementalInformesController::class, 'exportarExcel']);
 $router->get('/descargar-iieM', [IncrementalInformesController::class, 'exportarExcelM']);
+
+//Completa Informes
+$router->get('/completa-descargar-diaria', [CompletaInformesController::class, 'get']);
+$router->get('/completa-descargar-mensual', [CompletaInformesController::class, 'getM']);
+$router->get('/descargar-icd', [CompletaInformesController::class, 'exportarPDF']);
+$router->get('/descargar-icm', [CompletaInformesController::class, 'exportarPDFM']);
+$router->get('/descargar-icde', [CompletaInformesController::class, 'exportarExcel']);
+$router->get('/descargar-iceM', [CompletaInformesController::class, 'exportarExcelM']);
 
 // Completa
 $router->get('/completa', [CompletaController::class, 'completa']);

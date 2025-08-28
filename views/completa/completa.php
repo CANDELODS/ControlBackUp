@@ -35,7 +35,7 @@
                                     <?php echo $equipo->nombreEquipo; ?>
                                 </td>
                                 <td data-label="Área" class="table__td">
-                                     <!-- Mostramos el área de cada equipo -->
+                                    <!-- Mostramos el área de cada equipo -->
                                     <?php echo $equipo->idAreas->nombreArea; ?>
                                 </td>
                                 <td data-label="Local" class="table__td">
@@ -77,15 +77,20 @@
                         <?php } ?> <!--Fin foreach($equipos as $equipo)-->
                     </tbody>
                 </table>
-            <?php } else { ?> 
+            <?php } else { ?>
                 <p class="text-center">No Hay Equipos Para Listar</p>
             <?php } ?> <!--Fin if(!empty($equipos))-->
         </div>
         <div class="main__fi">
             <!-- Mostramos la fecha del día actual -->
-            <p class="main__f"><?php echo date('Y-m-d');?></p>
+            <p class="main__f"><?php echo date('Y-m-d'); ?></p>
             <input type="submit" class="formulario-copia__btn" value="Guardar">
         </div>
     </form>
-<!-- No necesitamos paginación en este archivo ya que estamos usando un scroll en la tabla -->
+    <!-- No necesitamos paginación en este archivo ya que estamos usando un scroll en la tabla -->
+    <div class="main__descargarI">
+        <h6 class="main__h6">Descargar Informes</h6>
+        <a href="/completa-descargar-diaria" class="main__btn main__btn--d">Diaria</a>
+        <a href="/completa-descargar-mensual" class="main__btn main__btn--m">Mensual</a>
+    </div>
 </main>
