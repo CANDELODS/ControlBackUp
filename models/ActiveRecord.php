@@ -282,7 +282,7 @@ class ActiveRecord
 
     //MESES
     // Contar meses distintos de una columna (ej: fecha)
-    //En pocas palabras cuenta cuántos meses distintos tienen registros incrementales.
+    //En pocas palabras cuenta cuántos meses distintos tienen registros dependiendo del tipo de copia.
     public static function totalMeses($columna, $whereCol = null, $whereVal = null)
     {
         $columna = self::$db->escape_string($columna);
@@ -390,10 +390,102 @@ class ActiveRecord
 
         return self::consultarSQL($query);
     }
-
-
-
     //FIN MESES
+
+    //COMPLETAS
+    // Total por mes específico (ej: 2025-07)
+    public static function totalPorMesC($columna, $mes)
+    {
+        $columna = self::$db->escape_string($columna);
+        $mes     = self::$db->escape_string($mes);
+
+        $query = "SELECT COUNT(DISTINCT DATE_FORMAT($columna, '%Y-%m')) AS total
+              FROM " . static::$tabla . "
+              WHERE DATE_FORMAT($columna, '%Y-%m') = '{$mes}'";
+
+        $res = self::$db->query($query);
+        $row = $res->fetch_assoc();
+        return (int)($row['total'] ?? 0);
+    }
+
+        // Obtener registros de un mes específico (agrupados)
+    public static function porMesPaginadoC($columna, $mes, $limite, $offset, $orden = 'ASC')
+    {
+        $columna = self::$db->escape_string($columna);
+        $mes     = self::$db->escape_string($mes);
+        $orden   = strtoupper($orden) === 'DESC' ? 'DESC' : 'ASC';
+        $limite  = (int) $limite;
+        $offset  = (int) $offset;
+
+        $query = "SELECT 
+                MIN(id) AS id,
+                DATE_FORMAT($columna, '%Y-%m') AS fecha
+              FROM " . static::$tabla . "
+              WHERE DATE_FORMAT($columna, '%Y-%m') = '{$mes}'";
+
+        $query .= " GROUP BY DATE_FORMAT($columna, '%Y-%m')
+                ORDER BY fecha {$orden}
+                LIMIT {$limite} OFFSET {$offset}";
+
+        return self::consultarSQL($query);
+    }
+
+        // Contar meses distintos de una columna (ej: fecha)
+    //En pocas palabras cuenta cuántos meses distintos tienen registros dependiendo del tipo de copia.
+    public static function totalMesesC($columna)
+    {
+        $columna = self::$db->escape_string($columna);
+
+        $query = "SELECT COUNT(DISTINCT DATE_FORMAT($columna, '%Y-%m')) AS total
+              FROM " . static::$tabla;
+
+        $res = self::$db->query($query);
+        $row = $res->fetch_assoc();
+        return (int)($row['total'] ?? 0);
+    }
+
+        // Obtener meses paginados (agrupados por mes)
+    public static function mesesPaginadosC($columna, $limite, $offset, $orden = 'ASC')
+    {
+        $columna = self::$db->escape_string($columna);
+        $orden   = strtoupper($orden) === 'DESC' ? 'DESC' : 'ASC';
+        $limite  = (int) $limite;
+        $offset  = (int) $offset;
+
+        $query = "SELECT 
+                MIN(id) AS id,
+                DATE_FORMAT($columna, '%Y-%m') AS fecha
+              FROM " . static::$tabla;
+
+        $query .= " GROUP BY DATE_FORMAT($columna, '%Y-%m')
+                ORDER BY fecha {$orden}
+                LIMIT {$limite} OFFSET {$offset}";
+
+        return self::consultarSQL($query);
+    }
+
+        //Obtener todos los copiaDetalle de un mes específico
+    public static function allWhereMesC($mes)
+    {
+        $query = "SELECT d.*
+            FROM copiasDetalle d
+            INNER JOIN copiasEncabezado e ON d.idCopiasEncabezado = e.id
+            AND DATE_FORMAT(e.fecha, '%Y-%m') = '{$mes}'";
+
+        $resultado = self::consultarSQL($query);
+        return $resultado;
+    }
+
+        // Búsqueda Where con LIKE (ideal para filtros por fecha o texto parcial)
+    public static function whereLikeC($columna, $valor)
+    {
+        $valor = self::$db->escape_string($valor);
+        $query = "SELECT * FROM " . static::$tabla . " WHERE ${columna} LIKE '%${valor}%' ";
+        $resultado = self::consultarSQL($query);
+        return $resultado;
+    }
+
+    //FIN COMPLETAS
 
     // crea un nuevo registro
     public function crear()

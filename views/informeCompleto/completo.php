@@ -33,7 +33,6 @@
                 <thead class="table__thead">
                     <tr>
                         <th scope="col" class="table__th">Fecha</th>
-                        <th scope="col" class="table__th">Tipo De Copia</th>
                         <th scope="col" class="table__th"></th>
                     </tr>
                 </thead>
@@ -45,18 +44,14 @@
                                 <!-- Mostramos la fecha de cada copia -->
                                 <?php echo $copia->fecha; ?>
                             </td>
-                            <td data-label="Tipo De Copia" class="table__td">
-                                <!-- Mostramos el tiopoDeCopia de cada copia -->
-                                <?php echo $copia->tipoDeCopia; ?>
-                            </td>
                             <td class="table__td--acciones">
                                 <!-- Enlace para redirigir al usuario a la vista de editar-copia, además se manda el id de la copiaEncabezao a editar
                                  por medio de la URL -->
-                                <a class="table__accion table__accion--descargarPDF" href="descargar-iim?fecha=<?php echo $copia->fecha; ?>">
+                                <a class="table__accion table__accion--descargarPDF" href="completo-dpdf?fecha=<?php echo $copia->fecha; ?>">
                                     <i class="fa-solid fa-file-pdf"></i>
                                     PDF
                                 </a>
-                                <a class="table__accion table__accion--descargarExcel" href="descargar-iieM?fecha=<?php echo $copia->fecha; ?>">
+                                <a class="table__accion table__accion--descargarExcel" href="completo-dxls?fecha=<?php echo $copia->fecha; ?>">
                                     <i class="fa-solid fa-file-excel"></i>
                                     EXCEL
                                 </a>
