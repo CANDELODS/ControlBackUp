@@ -71,7 +71,7 @@
             <?php if ($sin_resultados) { ?>
                 <p class="alerta alerta__error">No se encontraron copias con la fecha ingresada.</p>
             <?php } else { ?>
-                <p class="text-center">No Hay Copias Para Listar</p>
+                <p class="text-center">No Hay Copias Completas <a href="/completa">Crea Una</a></p>
             <?php } ?>
         <?php } ?><!--Fin if(!empty($copias))-->
     </div>

@@ -23,7 +23,7 @@ class EquiposController
         //La función filter var devuelve un boolean, por lo cual
         //Si devuelve false no pasará la validación, igualmente si
         //El número es negativo
-        if(!$pagina_actual || $pagina_actual < 1){
+        if (!$pagina_actual || $pagina_actual < 1) {
             header('Location: /equipos?page=1');
         }
         $registros_por_pagina = 8;
@@ -35,22 +35,26 @@ class EquiposController
         //Instanciamos el modelo de equipos
         $equipos = new Equipos;
         // Traemos todos los equipos
-        $equipos = Equipos::paginar('nombreEquipo',$registros_por_pagina, $paginacion->offset());
-        if($paginacion->totalPaginas() < $pagina_actual){
+        $equipos = Equipos::paginar('nombreEquipo', $registros_por_pagina, $paginacion->offset());
+        if ($paginacion->totalPaginas() > 0 && $pagina_actual > $paginacion->totalPaginas()) {
             header('Location: /equipos?page=1');
+            exit;
         }
+
         //CRUCE DE DATOS PARA OBTENER EL NOMBRE DEL ÁREA
         //Este ForEach Tiene Como Fin Cruzar Información De La BD Sin Necesidad De Crar Un Join Desde
         //El Active Record, Este Itera Cada Evento Y Crea Una LLave La Cual Compara Con Las Que
         //Que Hay En El Modelo De Esa Llave Creada Por Medio De La Función Find De Active Record
         //Con Esto Ya Podemos Acceder A Las Propiedades De Cada Llave Y Mostrarlas, Ver (Views-equipos->equipos.php)
-        foreach ($equipos as $equipo) {
-            //Se Crea Una LLave De idAreas Dentro Del Objeto De Equipos Y La Buscamos Por Su Id(En La Tabla De Areas)
-            $equipo->idAreas = Areas::find($equipo->idAreas);
-            //Verificamos si hay algo en el atributo local y nube de nuestro objeto,
-            //Si hay algo, lo convertimos a un string para mostrarlo en la vista
-            $equipo->local = $equipo->local ? 'Sí' : 'No';
-            $equipo->nube = $equipo->nube ? 'Sí' : 'No';
+        if (!empty($equipos)) {
+            foreach ($equipos as $equipo) {
+                //Se Crea Una LLave De idAreas Dentro Del Objeto De Equipos Y La Buscamos Por Su Id(En La Tabla De Areas)
+                $equipo->idAreas = Areas::find($equipo->idAreas);
+                //Verificamos si hay algo en el atributo local y nube de nuestro objeto,
+                //Si hay algo, lo convertimos a un string para mostrarlo en la vista
+                $equipo->local = $equipo->local ? 'Sí' : 'No';
+                $equipo->nube = $equipo->nube ? 'Sí' : 'No';
+            }
         }
         // Renderizamos la vista y enviamos las variables a la vista
         $router->render('equipos/equipos', [

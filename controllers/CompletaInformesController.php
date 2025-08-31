@@ -70,7 +70,7 @@ class CompletaInformesController
         }
         // Validación extra: Ejmplo, totalPaginas = 20 y $pagina_Actual = 21
         //Si el totalPaginas es 20, el usuario no puede estar en la 21 ya que no existe
-        if ($paginacion->totalPaginas() < $pagina_actual) {
+        if ($paginacion->totalPaginas() > 0 && $pagina_actual > $paginacion->totalPaginas()) {
             header('Location: /completa-descargar-diaria?page=1');
         }
         //Convertimos los 0 y 1 de la columna tipoDeCopia en strings para usarlos en la vista
@@ -136,7 +136,7 @@ class CompletaInformesController
         }
 
         // Validación de página fuera de rango
-        if ($paginacion && $paginacion->totalPaginas() < $pagina_actual) {
+        if ($paginacion->totalPaginas() > 0 && $pagina_actual > $paginacion->totalPaginas()) {
             header('Location: /completa-descargar-mensual?page=1');
             exit;
         }

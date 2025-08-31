@@ -124,6 +124,7 @@
         </div>
         <div class="main__fi">
             <!-- Mostramos la fecha del día actual -->
+            <?php date_default_timezone_set('America/Bogota'); ?>
             <p class="main__f"><?php echo date('Y-m-d'); ?></p>
             <input type="submit" class="formulario-copia__btn" value="Guardar">
         </div>

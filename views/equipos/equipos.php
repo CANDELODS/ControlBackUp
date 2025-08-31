@@ -46,7 +46,7 @@
                             <td class="table__td--acciones">
                                 <!-- Enlace para redirigir al usuario a la vista de editar-equipo, además se manda el id del equipo a editar
                                  por medio de la URL -->
-                                <a class="table__accion table__accion--editar" href="editar-equipo?id=<?php echo $equipo->id;?>">Editar</a>
+                                <a class="table__accion table__accion--editar" href="editar-equipo?id=<?php echo $equipo->id; ?>">Editar</a>
                                 <!-- Botón para eliminar un equipo, además tiene un input de tipo hidden el cual manda el id del equipo
                                  al servidor y así poder eliminar el equipo -->
                                 <form method="post" action="eliminar-equipo" class="table__form">
@@ -60,12 +60,14 @@
                     <?php } ?> <!--Fin foreach($equipos as $equipo)-->
                 </tbody>
             </table>
-        <?php } else { ?> 
-            <p class="text-center">No Hay Equipos Para Listar</p>
+        <?php } else { ?>
+            <p class="text-center">No Hay Equipos Para Listar, <a href="/crear-equipo">Crea Tu Primer Equipo</a></p>
         <?php } ?> <!--Fin if(!empty($equipos))-->
     </div>
-<!-- Mostramos los enlaces de la paginación -->
-<?php
-    echo $paginacion;
-?>
+    <!-- Mostramos los enlaces de la paginación -->
+    <?php
+    if (!empty($equipos)) {
+        echo $paginacion;
+    }
+    ?>
 </main>

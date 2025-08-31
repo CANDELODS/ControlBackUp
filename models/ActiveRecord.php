@@ -147,7 +147,19 @@ class ActiveRecord
     // Busca un registro por su id
     public static function find($id)
     {
-        $query = "SELECT * FROM " . static::$tabla  . " WHERE id = ${id}";
+        // Evita SQL inválido si llega vacío o no numérico
+        if ($id === null || $id === '' || !is_numeric($id)) {
+            return null;
+        }
+
+        $id    = (int) $id;                     // cast seguro
+        $tabla = static::$tabla ?? '';
+
+        if ($tabla === '') {
+            throw new \RuntimeException('Tabla no definida en el modelo ' . static::class);
+        }
+
+        $query = "SELECT * FROM {$tabla} WHERE id = {$id} LIMIT 1";
         $resultado = self::consultarSQL($query);
         return array_shift($resultado);
     }
@@ -305,10 +317,10 @@ class ActiveRecord
     public static function allWhereMes($mes, $tipoDeCopia)
     {
         $query = "SELECT d.*
-            FROM copiasDetalle d
-            INNER JOIN copiasEncabezado e ON d.idCopiasEncabezado = e.id
-            WHERE e.tipoDeCopia = {$tipoDeCopia}
-            AND DATE_FORMAT(e.fecha, '%Y-%m') = '{$mes}'";
+              FROM copiasDetalle d
+              INNER JOIN copiasEncabezado e 
+                      ON e.id = d.idCopiasEncabezado
+              WHERE DATE_FORMAT(e.fecha, '%Y-%m') = '{$mes}'";
 
         $resultado = self::consultarSQL($query);
         return $resultado;
@@ -408,7 +420,7 @@ class ActiveRecord
         return (int)($row['total'] ?? 0);
     }
 
-        // Obtener registros de un mes específico (agrupados)
+    // Obtener registros de un mes específico (agrupados)
     public static function porMesPaginadoC($columna, $mes, $limite, $offset, $orden = 'ASC')
     {
         $columna = self::$db->escape_string($columna);
@@ -430,7 +442,7 @@ class ActiveRecord
         return self::consultarSQL($query);
     }
 
-        // Contar meses distintos de una columna (ej: fecha)
+    // Contar meses distintos de una columna (ej: fecha)
     //En pocas palabras cuenta cuántos meses distintos tienen registros dependiendo del tipo de copia.
     public static function totalMesesC($columna)
     {
@@ -444,7 +456,7 @@ class ActiveRecord
         return (int)($row['total'] ?? 0);
     }
 
-        // Obtener meses paginados (agrupados por mes)
+    // Obtener meses paginados (agrupados por mes)
     public static function mesesPaginadosC($columna, $limite, $offset, $orden = 'ASC')
     {
         $columna = self::$db->escape_string($columna);
@@ -464,19 +476,20 @@ class ActiveRecord
         return self::consultarSQL($query);
     }
 
-        //Obtener todos los copiaDetalle de un mes específico
+    //Obtener todos los copiaDetalle de un mes específico
     public static function allWhereMesC($mes)
     {
         $query = "SELECT d.*
-            FROM copiasDetalle d
-            INNER JOIN copiasEncabezado e ON d.idCopiasEncabezado = e.id
-            AND DATE_FORMAT(e.fecha, '%Y-%m') = '{$mes}'";
+              FROM copiasDetalle d
+              INNER JOIN copiasEncabezado e 
+                      ON e.id = d.idCopiasEncabezado
+              WHERE DATE_FORMAT(e.fecha, '%Y-%m') = '{$mes}'";
 
         $resultado = self::consultarSQL($query);
         return $resultado;
     }
 
-        // Búsqueda Where con LIKE (ideal para filtros por fecha o texto parcial)
+    // Búsqueda Where con LIKE (ideal para filtros por fecha o texto parcial)
     public static function whereLikeC($columna, $valor)
     {
         $valor = self::$db->escape_string($valor);
