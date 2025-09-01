@@ -10,7 +10,7 @@
             <a href="/copias" class="main__btn main__btn--c">Regresar</a>
         </div>
     </div>
-    <form action="" class="formulario-copia" method="post">
+    <form action="" class="formulario-copia" method="post" onsubmit="return confirmDelete('¿Estás seguro de que deseas guardar?')">
         <div class="tabla--scroll">
             <!-- Verifficamos si hay equipos para mostrar -->
             <?php if (!empty($equipos)) { ?>

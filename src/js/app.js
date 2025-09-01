@@ -42,12 +42,12 @@ function manejarEnvio() {
 }
 //Validar dias domingos en el input type date
 const inputFecha = document.querySelector('.formularioFiltro__date');
-inputFecha.addEventListener('change', function(){
+inputFecha.addEventListener('change', function () {
     //Convertimos el value de inputFecha en un objeto Date para
     //Poder usar el método getDay()
     const fechaSeleccionada = new Date(inputFecha.value);
     const dia = fechaSeleccionada.getDay(); // 6 = Domingo, 0 = Lunes
-        if (dia === 6) {
+    if (dia === 6) {
         alert('No puedes seleccionar un domingo.');
         inputFecha.value = ''; // Limpiar el input
     }
@@ -60,13 +60,13 @@ const navegacion = document.querySelector('#navegacion');
 const links = document.querySelectorAll('.navegacion__enlace');
 
 //Función para abrir el menú
-abrirMenu.addEventListener('click', function(){
+abrirMenu.addEventListener('click', function () {
     //Agrego la clase .mostrar a la nav
     navegacion.classList.add('mostrar');
 });
 
 //Función para cerrar el menú
-cerrarMenu.addEventListener('click', function(){
+cerrarMenu.addEventListener('click', function () {
     //Elimino la clase .mostrar a la nav
     navegacion.classList.remove('mostrar');
 });
@@ -74,7 +74,7 @@ cerrarMenu.addEventListener('click', function(){
 //Función para cerrar el menú al hacer click en un enlace
 links.forEach(link => {
     //Agrego el evento click a cada enlace
-    link.addEventListener('click', function(){
+    link.addEventListener('click', function () {
         //Agrego la clase .esconder a la navegacion
         navegacion.classList.add('esconder');
         //Elimino la clase .mostrar a la navegacion
@@ -86,3 +86,9 @@ links.forEach(link => {
     });
 });
 //FIN MENÚ MOBILE
+
+//Mensaje de confirmación
+function confirmDelete(message) {
+    //Si no hay mensaje se mostrará el texto por defecto
+    return confirm(message || "¿Estás seguro de eliminar este elemento?");
+}

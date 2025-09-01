@@ -13,7 +13,7 @@
     <main>
 <!-- Es el mismo formulario que usamos para crear, pero su action es diferente -->
 <!--Quitamos el action del formulario para que no nos borre el parámetro id en la URL-->
-        <form method="post" class="eformulario">
+        <form method="post" class="eformulario" onsubmit="return confirmDelete('¿Estás seguro de que deseas editar este equipo? Se editarán también los informes.')" >
         <!-- Importamos las alertas -->
         <?php
         require_once __DIR__ . '/../templates/alertas.php';

@@ -4,7 +4,7 @@
         <div class="footer__aclaracion">
             <p class="footer__p-aclaracion">
                 &quot;Aquí podrás descargar el informe mensual completo de las copias de
-                de seguridad, este toma las copias incremental y mensuales del mes, si quieres que el
+                seguridad, este toma las copias incremental y mensuales del mes, si quieres que el
                 informe sea específico de algún tipo de copia (Incremental o completa)
                 ingresa a los links: <a href="/incremental" class="footer__link">Incremental</a> o <a href="/completa" class="footer__link">Completa</a>.&quot;
             </p>

@@ -49,7 +49,7 @@
                                 <a class="table__accion table__accion--editar" href="editar-equipo?id=<?php echo $equipo->id; ?>">Editar</a>
                                 <!-- Botón para eliminar un equipo, además tiene un input de tipo hidden el cual manda el id del equipo
                                  al servidor y así poder eliminar el equipo -->
-                                <form method="post" action="eliminar-equipo" class="table__form">
+                                <form method="post" action="eliminar-equipo" class="table__form" onsubmit="return confirmDelete('¿Estás seguro de que deseas eliminar este equipo? Se eliminará también de los informes.')">
                                     <input type="hidden" name="id" value="<?php echo $equipo->id; ?>">
                                     <button class="table__accion table__accion--eliminar" type="submit">
                                         Eliminar
