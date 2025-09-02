@@ -293,7 +293,358 @@ class InformeCompletoController
             $pdf->writeHTML($html);
         }
         //Mostramos el PDF en el navegador
-        $pdf->Output("Informe_Mensual_Completas_$fecha.pdf", 'I');
+        $pdf->Output("Informe_Completo_$fecha.pdf", 'I');
+    }
+
+    public static function exportarExcel()
+    {
+        if (!isAuth()) {
+            header('Location: /');
+            exit;
+        }
+
+        $fecha = $_GET['fecha'] ?? '';
+        $nombreArchivo = "Informe Completo {$fecha}.xlsx";
+        if (!$fecha) {
+            header('Location: /completo-descargar');
+            exit;
+        }
+
+        // Encabezado por fecha
+        $copias = CopiasEncabezado::whereLikeC('fecha', $fecha);
+        if (empty($copias)) {
+            echo "<script>alert('No se encontraron registros para la fecha seleccionada.');window.location.href='/completa-descargar-diaria';</script>";
+            exit;
+        }
+
+        // ===== Datos base =====
+        $detalles = CopiasDetalle::allWhereMesC($fecha);
+        foreach ($detalles as $detalle) {
+            $detalle->equipos = Equipos::find($detalle->idEquipos);
+        }
+
+        // Ordenar por nombre de equipo
+        usort($detalles, fn($a, $b) => strcmp($a->equipos->nombreEquipo, $b->equipos->nombreEquipo));
+
+        // Resumen por equipo
+        $resumen = [];
+        foreach ($detalles as $detalle) {
+            $equipo = $detalle->equipos->nombreEquipo ?? '';
+            if (!isset($resumen[$equipo])) {
+                $resumen[$equipo] = [
+                    'local' => 0,
+                    'nube'  => 0,
+                    'total' => 0,
+                    'evaluacion' => '',
+                    'habilitado_local' => (int)($detalle->equipos->local ?? 0),
+                    'habilitado_nube'  => (int)($detalle->equipos->nube ?? 0),
+                ];
+            }
+            if ($detalle->copiaLocal == 1) $resumen[$equipo]['local']++;
+            if ($detalle->copiaNube  == 1) $resumen[$equipo]['nube']++;
+            $resumen[$equipo]['total'] = $resumen[$equipo]['local'] + $resumen[$equipo]['nube'];
+        }
+
+        foreach ($resumen as &$d) {
+            $t = $d['total'];
+            $d['evaluacion'] = $t >= 4 ? 'Excelente' : ($t >= 2 ? 'Bien' : 'Mal');
+        }
+        unset($d);
+
+        // ===== Estadísticas =====
+        $ordenLocal = array_filter($resumen, fn($d) => !empty($d['habilitado_local']));
+        uasort($ordenLocal, fn($a, $b) => $b['local'] <=> $a['local']);
+
+        $ordenNube  = array_filter($resumen, fn($d) => !empty($d['habilitado_nube']));
+        uasort($ordenNube,  fn($a, $b) => $b['nube']  <=> $a['nube']);
+
+        $masLocal   = !empty($ordenLocal) ? array_key_first($ordenLocal) : null;
+        $menosLocal = !empty($ordenLocal) ? array_key_last($ordenLocal)  : null;
+        $masNube    = !empty($ordenNube)  ? array_key_first($ordenNube)  : null;
+        $menosNube  = !empty($ordenNube)  ? array_key_last($ordenNube)   : null;
+
+        $top3Local     = array_slice($ordenLocal, 0, 3, true);
+        $bottom3Local  = array_slice($ordenLocal, -3, 3, true);
+        $top3Nube      = array_slice($ordenNube,  0, 3, true);
+        $bottom3Nube   = array_slice($ordenNube,  -3, 3, true);
+
+        $totalLocal  = array_sum(array_column($resumen, 'local'));
+        $totalNube   = array_sum(array_column($resumen, 'nube'));
+        $totalGlobal = $totalLocal + $totalNube;
+
+        // Textos “Más/Menos” (como en el PDF)
+        $masLocalTxt   = $masLocal   ? "{$masLocal} ({$ordenLocal[$masLocal]['local']})"       : 'Sin equipos habilitados';
+        $menosLocalTxt = $menosLocal ? "{$menosLocal} ({$ordenLocal[$menosLocal]['local']})"   : 'Sin equipos habilitados';
+        $masNubeTxt    = $masNube    ? "{$masNube} ({$ordenNube[$masNube]['nube']})"           : 'Sin equipos habilitados';
+        $menosNubeTxt  = $menosNube  ? "{$menosNube} ({$ordenNube[$menosNube]['nube']})"       : 'Sin equipos habilitados';
+
+        // ===== Excel =====
+        $spreadsheet = new Spreadsheet();
+
+        // === HOJA 1: Tabla principal ===
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle("Copias");
+
+        $sheet->setCellValue('A1', "Informe Mensual Completas - $fecha");
+        $sheet->mergeCells('A1:E1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        $sheet->fromArray(['Equipo', 'Local', 'Nube', 'Total', 'Evaluación'], null, 'A3');
+
+        $fila = 4;
+        foreach ($resumen as $equipo => $d) {
+            $sheet->setCellValue("A{$fila}", $equipo);
+            $sheet->setCellValue("B{$fila}", $d['local']);
+            $sheet->setCellValue("C{$fila}", $d['nube']);
+            $sheet->setCellValue("D{$fila}", $d['total']);
+            $sheet->setCellValue("E{$fila}", $d['evaluacion']);
+
+            $color = $d['evaluacion'] === 'Mal' ? 'F8D7DA' : ($d['evaluacion'] === 'Bien' ? 'FFF3CD' : 'D4EDDA');
+            $sheet->getStyle("E{$fila}")->getFill()
+                ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setRGB($color);
+            $fila++;
+        }
+
+        $sheet->getStyle("A3:E3")->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'color' => ['rgb' => '4F81BD']]
+        ]);
+
+        $sheet->getStyle("A3:E" . ($fila - 1))->applyFromArray([
+            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN, 'color' => ['rgb' => '000000']]]
+        ]);
+
+        foreach (range('A', 'E') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // === HOJA 2: Resumen y gráficos ===
+        $sheet2 = $spreadsheet->createSheet();
+        $sheet2->setTitle("Resumen");
+
+        // Título
+        $sheet2->setCellValue("A1", "Resumen Estadístico - $fecha");
+        $sheet2->getStyle("A1")->getFont()->setBold(true)->setSize(14);
+
+        // Totales
+        $sheet2->setCellValue("A3", "• Total de copias locales:");
+        $sheet2->setCellValue("B3", "{$totalLocal}");
+        $sheet2->getStyle("A3")->getFont()->setBold(true);
+        $sheet2->setCellValue("A4", "• Total de copias en nube:");
+        $sheet2->setCellValue("B4", "{$totalNube}");
+        $sheet2->getStyle("A4")->getFont()->setBold(true);
+        $sheet2->setCellValue("A5", "• Sumatoria de totales (Local + Nube):");
+        $sheet2->setCellValue("B5", "{$totalGlobal}");
+        $sheet2->getStyle("A5")->getFont()->setBold(true);
+
+        // Más / Menos (en UNA celda cada línea)
+        $sheet2->setCellValue("A7",  "• Equipo con más copias locales:");
+        $sheet2->setCellValue("B7",  "{$masLocalTxt}");
+        $sheet2->getStyle("A7")->getFont()->setBold(true);
+        $sheet2->setCellValue("A8",  "• Equipo con menos copias locales:");
+        $sheet2->setCellValue("B8",  "{$menosLocalTxt}");
+        $sheet2->getStyle("A8")->getFont()->setBold(true);
+        $sheet2->setCellValue("A9",  "• Equipo con más copias en nube:");
+        $sheet2->setCellValue("B9",  "{$masNubeTxt}");
+        $sheet2->getStyle("A9")->getFont()->setBold(true);
+        $sheet2->setCellValue("A10", "• Equipo con menos copias en nube:");
+        $sheet2->setCellValue("B10", "{$menosNubeTxt}");
+        $sheet2->getStyle("A10")->getFont()->setBold(true);
+
+        // Ajustes para que no se corte el texto
+        $sheet2->getStyle("A3:A10")->getAlignment()->setWrapText(true);
+        $sheet2->getColumnDimension('A')->setAutoSize(true);
+        for ($r = 3; $r <= 10; $r++) {
+            $sheet2->getRowDimension($r)->setRowHeight(-1); // auto
+        }
+
+        // === Top/Bottom 3 (tablas) ===
+        $filaTB = 12;
+
+        // Encabezados secciones
+        $sheet2->setCellValue("A{$filaTB}", "Equipos con más copias locales");
+        $sheet2->getStyle("A{$filaTB}")->getFont()->setBold(true);
+        $filaTB++;
+
+        $sheet2->fromArray(['Equipo', 'Local'], null, "A{$filaTB}");
+        $sheet2->getStyle("A{$filaTB}:B{$filaTB}")->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'color' => ['rgb' => '4F81BD']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+        ]);
+        $filaTB++;
+
+        foreach ($top3Local as $eq => $d) {
+            $sheet2->setCellValue("A{$filaTB}", $eq);
+            $sheet2->setCellValue("B{$filaTB}", $d['local']);
+            $filaTB++;
+        }
+        $sheet2->getStyle("A" . ($filaTB - count($top3Local)) . ":B" . ($filaTB - 1))->applyFromArray([
+            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN]]
+        ]);
+
+        $filaTB += 1;
+        $sheet2->setCellValue("A{$filaTB}", "Equipos con menos copias locales");
+        $sheet2->getStyle("A{$filaTB}")->getFont()->setBold(true);
+        $filaTB++;
+
+        $sheet2->fromArray(['Equipo', 'Local'], null, "A{$filaTB}");
+        $sheet2->getStyle("A{$filaTB}:B{$filaTB}")->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'color' => ['rgb' => '4F81BD']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+        ]);
+        $filaTB++;
+
+        foreach ($bottom3Local as $eq => $d) {
+            $sheet2->setCellValue("A{$filaTB}", $eq);
+            $sheet2->setCellValue("B{$filaTB}", $d['local']);
+            $filaTB++;
+        }
+        $sheet2->getStyle("A" . ($filaTB - count($bottom3Local)) . ":B" . ($filaTB - 1))->applyFromArray([
+            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN]]
+        ]);
+
+        $filaTB += 1;
+        $sheet2->setCellValue("D12", "Equipos con más copias en nube");
+        $sheet2->getStyle("D12")->getFont()->setBold(true);
+
+        $sheet2->fromArray(['Equipo', 'Nube'], null, "D13");
+        $sheet2->getStyle("D13:E13")->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'color' => ['rgb' => '4F81BD']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+        ]);
+
+        $filaN = 14;
+        foreach ($top3Nube as $eq => $d) {
+            $sheet2->setCellValue("D{$filaN}", $eq);
+            $sheet2->setCellValue("E{$filaN}", $d['nube']);
+            $filaN++;
+        }
+        $sheet2->getStyle("D14:E" . ($filaN - 1))->applyFromArray([
+            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN]]
+        ]);
+
+        $sheet2->setCellValue("D" . ($filaN + 1), "Equipos con menos copias en nube");
+        $sheet2->getStyle("D" . ($filaN + 1))->getFont()->setBold(true);
+
+        $sheet2->fromArray(['Equipo', 'Nube'], null, "D" . ($filaN + 2));
+        $sheet2->getStyle("D" . ($filaN + 2) . ":E" . ($filaN + 2))->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'color' => ['rgb' => '4F81BD']],
+            'alignment' => ['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+        ]);
+
+        $filaN2 = $filaN + 3;
+        foreach ($bottom3Nube as $eq => $d) {
+            $sheet2->setCellValue("D{$filaN2}", $eq);
+            $sheet2->setCellValue("E{$filaN2}", $d['nube']);
+            $filaN2++;
+        }
+        $sheet2->getStyle("D" . ($filaN + 3) . ":E" . ($filaN2 - 1))->applyFromArray([
+            'borders' => ['allBorders' => ['borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN]]
+        ]);
+
+        // Autoajuste columnas hoja 2
+        foreach (['A', 'B', 'C', 'D', 'E'] as $col) {
+            $sheet2->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // === Gráfico circular Local vs Nube ===
+        $dataSeriesLabels = [
+            new \PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues('String', 'Resumen!$A$3', null, 1),
+            new \PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues('String', 'Resumen!$A$4', null, 1),
+        ];
+        $xAxisTickValues = [
+            new \PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues('String', 'Resumen!$A$3:$A$4', null, 2),
+        ];
+        $dataSeriesValues = [
+            new \PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues('Number', 'Resumen!$A$3:$A$4', null, 2), // etiquetas en A (pero valores numéricos están embebidos en el texto)
+        ];
+        // Para el pie usamos los números reales: B3:B4 (creamos números espejo)
+        $sheet2->setCellValue('B3', $totalLocal);
+        $sheet2->setCellValue('B4', $totalNube);
+        $dataSeriesValues = [
+            new \PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues('Number', 'Resumen!$B$3:$B$4', null, 2),
+        ];
+
+        $series = new \PhpOffice\PhpSpreadsheet\Chart\DataSeries(
+            \PhpOffice\PhpSpreadsheet\Chart\DataSeries::TYPE_PIECHART,
+            null,
+            range(0, count($dataSeriesValues) - 1),
+            $dataSeriesLabels,
+            $xAxisTickValues,
+            $dataSeriesValues
+        );
+        $layout = new \PhpOffice\PhpSpreadsheet\Chart\Layout();
+        $layout->setShowVal(true)->setShowPercent(true);
+        $plotArea = new \PhpOffice\PhpSpreadsheet\Chart\PlotArea($layout, [$series]);
+        $legend  = new \PhpOffice\PhpSpreadsheet\Chart\Legend(\PhpOffice\PhpSpreadsheet\Chart\Legend::POSITION_RIGHT, null, false);
+        $title   = new \PhpOffice\PhpSpreadsheet\Chart\Title('Distribución Local vs Nube');
+
+        $chart1 = new \PhpOffice\PhpSpreadsheet\Chart\Chart('chart1', $title, $legend, $plotArea);
+        $chart1->setTopLeftPosition('G3');
+        $chart1->setBottomRightPosition('N20');
+        $sheet2->addChart($chart1);
+
+        // === Gráfico barras Top 5 por total ===
+        uasort($resumen, fn($a, $b) => $b['total'] <=> $a['total']);
+        $top5 = array_slice($resumen, 0, 5, true);
+
+        $sheet2->setCellValue("G22", "Equipo");
+        $sheet2->setCellValue("H22", "Local");
+        $sheet2->setCellValue("I22", "Nube");
+        $r = 23;
+        foreach ($top5 as $eq => $d) {
+            $sheet2->setCellValue("G{$r}", $eq);
+            $sheet2->setCellValue("H{$r}", $d['local']);
+            $sheet2->setCellValue("I{$r}", $d['nube']);
+            $r++;
+        }
+
+        $lbls = [
+            new \PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues('String', 'Resumen!$H$22', null, 1),
+            new \PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues('String', 'Resumen!$I$22', null, 1),
+        ];
+        $cats = [
+            new \PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues('String', 'Resumen!$G$23:$G$' . ($r - 1), null, 5),
+        ];
+        $vals = [
+            new \PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues('Number', 'Resumen!$H$23:$H$' . ($r - 1), null, 5),
+            new \PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues('Number', 'Resumen!$I$23:$I$' . ($r - 1), null, 5),
+        ];
+
+        $series2 = new \PhpOffice\PhpSpreadsheet\Chart\DataSeries(
+            \PhpOffice\PhpSpreadsheet\Chart\DataSeries::TYPE_BARCHART,
+            \PhpOffice\PhpSpreadsheet\Chart\DataSeries::GROUPING_CLUSTERED,
+            range(0, count($vals) - 1),
+            $lbls,
+            $cats,
+            $vals
+        );
+        $series2->setPlotDirection(\PhpOffice\PhpSpreadsheet\Chart\DataSeries::DIRECTION_COL);
+
+        $plotArea2 = new \PhpOffice\PhpSpreadsheet\Chart\PlotArea(null, [$series2]);
+        $legend2   = new \PhpOffice\PhpSpreadsheet\Chart\Legend(\PhpOffice\PhpSpreadsheet\Chart\Legend::POSITION_RIGHT, null, false);
+        $title2    = new \PhpOffice\PhpSpreadsheet\Chart\Title('Top 5 Equipos - Local/Nube');
+
+        $chart2 = new \PhpOffice\PhpSpreadsheet\Chart\Chart('chart2', $title2, $legend2, $plotArea2);
+        $chart2->setTopLeftPosition('G22');
+        $chart2->setBottomRightPosition('N40');
+        $sheet2->addChart($chart2);
+
+        // === Descargar ===
+        $writer = new Xlsx($spreadsheet);
+        $writer->setIncludeCharts(true);
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header("Content-Disposition: attachment;filename=\"{$nombreArchivo}\"");
+        header('Cache-Control: max-age=0');
+        $writer->save('php://output');
+        exit;
     }
 
 }
