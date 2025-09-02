@@ -320,8 +320,9 @@ class ActiveRecord
               FROM copiasDetalle d
               INNER JOIN copiasEncabezado e 
                       ON e.id = d.idCopiasEncabezado
-              WHERE DATE_FORMAT(e.fecha, '%Y-%m') = '{$mes}'";
-
+              WHERE DATE_FORMAT(e.fecha, '%Y-%m') = '{$mes}'
+              AND e.tipoDeCopia = {$tipoDeCopia}";
+              
         $resultado = self::consultarSQL($query);
         return $resultado;
     }
