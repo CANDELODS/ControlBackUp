@@ -359,10 +359,10 @@ class IncrementalInformesController
         }
 
         // Creamos unos criterios de evaluación
-        //Excente (20 o más), Bien (10 a 19), Mal (menos de 10)
+        //Exelente (16 o más), Bien (12 a 15), Mal (menos de 12)
         foreach ($resumen as $eq => &$d) {
             $t = $d['total'];
-            $d['evaluacion'] = $t >= 20 ? 'Excelente' : ($t >= 10 ? 'Bien' : 'Mal');
+            $d['evaluacion'] = $t >= 16 ? 'Excelente' : ($t >= 12 ? 'Bien' : 'Mal');
         }
         //Destruimos la variable para que no haya referencias inesperadas
         unset($d);
@@ -562,6 +562,8 @@ class IncrementalInformesController
         $spreadsheet = new Spreadsheet();
         //Obtenemos la hoja activa en donde se escribirán los datos
         $sheet = $spreadsheet->getActiveSheet();
+        $sheet1 = $spreadsheet->getSheet(0);
+        $sheet1->setShowGridlines(false);
 
         // ENCABEZADOS
         //Todos estos irán en la primera fila
@@ -727,7 +729,7 @@ class IncrementalInformesController
 
         foreach ($resumen as &$d) {
             $t = $d['total'];
-            $d['evaluacion'] = $t >= 20 ? 'Excelente' : ($t >= 10 ? 'Bien' : 'Mal');
+            $d['evaluacion'] = $t >= 16 ? 'Excelente' : ($t >= 12 ? 'Bien' : 'Mal');
         }
         unset($d);
 
@@ -763,6 +765,8 @@ class IncrementalInformesController
 
         // === HOJA 1: Tabla principal ===
         $sheet = $spreadsheet->getActiveSheet();
+        $sheet1 = $spreadsheet->getSheet(0);
+        $sheet1->setShowGridlines(false);
         $sheet->setTitle("Copias");
 
         $sheet->setCellValue('A1', "Informe Mensual Incremental - $fecha");
@@ -803,6 +807,8 @@ class IncrementalInformesController
 
         // === HOJA 2: Resumen y gráficos ===
         $sheet2 = $spreadsheet->createSheet();
+        $sheet1 = $spreadsheet->getSheet(1);
+        $sheet1->setShowGridlines(false);
         $sheet2->setTitle("Resumen");
 
         // Título

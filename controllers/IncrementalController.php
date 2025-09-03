@@ -30,6 +30,7 @@ class IncrementalController
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             //Paso 1: Generar el encabezado de la copia (Sesión del dia)
             //Obtener fecha actual
+            date_default_timezone_set('America/Bogota');
             $copiasEncabezado->fecha = date('Y-m-d');
             //Asignamos el valor de 1 para indicar que es una copia incremental
             $copiasEncabezado->tipoDeCopia = '1';

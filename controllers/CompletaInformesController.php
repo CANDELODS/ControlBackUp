@@ -362,7 +362,7 @@ class CompletaInformesController
         //Excente (20 o más), Bien (10 a 19), Mal (menos de 10)
         foreach ($resumen as $eq => &$d) {
             $t = $d['total'];
-            $d['evaluacion'] = $t >= 4 ? 'Excelente' : ($t >= 2 ? 'Bien' : 'Mal');
+            $d['evaluacion'] = $t >= 4 ? 'Excelente' : 'Mal';
         }
         //Destruimos la variable para que no haya referencias inesperadas
         unset($d);
@@ -562,7 +562,8 @@ class CompletaInformesController
         $spreadsheet = new Spreadsheet();
         //Obtenemos la hoja activa en donde se escribirán los datos
         $sheet = $spreadsheet->getActiveSheet();
-
+        $sheet1 = $spreadsheet->getSheet(0);
+        $sheet1->setShowGridlines(false);
         // ENCABEZADOS
         //Todos estos irán en la primera fila
         $sheet->setCellValue('A1', 'Equipo');
@@ -727,7 +728,7 @@ class CompletaInformesController
 
         foreach ($resumen as &$d) {
             $t = $d['total'];
-            $d['evaluacion'] = $t >= 4 ? 'Excelente' : ($t >= 2 ? 'Bien' : 'Mal');
+            $d['evaluacion'] = $t >= 4 ? 'Excelente' : 'Mal';
         }
         unset($d);
 
@@ -763,6 +764,8 @@ class CompletaInformesController
 
         // === HOJA 1: Tabla principal ===
         $sheet = $spreadsheet->getActiveSheet();
+        $sheet1 = $spreadsheet->getSheet(0);
+        $sheet1->setShowGridlines(false);
         $sheet->setTitle("Copias");
 
         $sheet->setCellValue('A1', "Informe Mensual Completas - $fecha");
@@ -803,6 +806,8 @@ class CompletaInformesController
 
         // === HOJA 2: Resumen y gráficos ===
         $sheet2 = $spreadsheet->createSheet();
+        $sheet1 = $spreadsheet->getSheet(1);
+        $sheet1->setShowGridlines(false);
         $sheet2->setTitle("Resumen");
 
         // Título

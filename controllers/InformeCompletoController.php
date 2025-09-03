@@ -143,10 +143,10 @@ class InformeCompletoController
         }
 
         // Creamos unos criterios de evaluación
-        //Excente (20 o más), Bien (10 a 19), Mal (menos de 10)
+        //Excelente (20 o más), Bien (10 a 19), Mal (menos de 10)
         foreach ($resumen as $eq => &$d) {
             $t = $d['total'];
-            $d['evaluacion'] = $t >= 4 ? 'Excelente' : ($t >= 2 ? 'Bien' : 'Mal');
+            $d['evaluacion'] = $t >= 20 ? 'Excelente' : ($t >= 15 ? 'Bien' : 'Mal');
         }
         //Destruimos la variable para que no haya referencias inesperadas
         unset($d);
@@ -347,7 +347,7 @@ class InformeCompletoController
 
         foreach ($resumen as &$d) {
             $t = $d['total'];
-            $d['evaluacion'] = $t >= 4 ? 'Excelente' : ($t >= 2 ? 'Bien' : 'Mal');
+            $d['evaluacion'] = $t >= 20 ? 'Excelente' : ($t >= 15 ? 'Bien' : 'Mal');
         }
         unset($d);
 
@@ -383,6 +383,8 @@ class InformeCompletoController
 
         // === HOJA 1: Tabla principal ===
         $sheet = $spreadsheet->getActiveSheet();
+        $sheet1 = $spreadsheet->getSheet(0);
+        $sheet1->setShowGridlines(false);
         $sheet->setTitle("Copias");
 
         $sheet->setCellValue('A1', "Informe Mensual Completas - $fecha");
@@ -423,6 +425,8 @@ class InformeCompletoController
 
         // === HOJA 2: Resumen y gráficos ===
         $sheet2 = $spreadsheet->createSheet();
+        $sheet1 = $spreadsheet->getSheet(1);
+        $sheet1->setShowGridlines(false);
         $sheet2->setTitle("Resumen");
 
         // Título

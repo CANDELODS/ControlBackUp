@@ -1,7 +1,7 @@
 {
-  "name": "devwebcamp-php-mvc-mysql",
+  "name": "controlbackup-php-mvc-mysql",
   "version": "1.0.0",
-  "description": "Proyecto Final Desarrollo Web Completo con @codigoconjuan",
+  "description": "Proyecto Para La Empresa Ladrillera Melendez Hecho Por El Auxiliar De Sistemas Juan Sebastian Candelo Balanta",
   "main": "index.js",
   "scripts": {
     "dev": "gulp dev"

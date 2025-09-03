@@ -29,17 +29,46 @@ function prepararCheckboxes() {
 
 //Se asegura que justo antes de enviar el formulario (con el botón submit),
 //los checkboxes vuelvan a ajustar sus valores a 1 o 0, por si algún cambio no se capturó.
-function manejarEnvio() {
     const formulario = document.querySelector('.formulario-copia');
-    const checkboxes = formulario.querySelectorAll('.checkboxes');
 
-    formulario.addEventListener('submit', function () {
-        checkboxes.forEach(cb => {
-            // Fuerza que todos se marquen para ser enviados
-            cb.checked = true;
+    formulario.addEventListener('submit', function (e) {
+        const filas = formulario.querySelectorAll('tbody tr');
+        let equiposSinCopia = [];
+
+        filas.forEach(fila => {
+            const nombreEquipo = fila.querySelector('td[data-label="Nombre"]').innerText.trim();
+            const local = fila.querySelector('.copia-local:not([disabled])');
+            const nube = fila.querySelector('.copia-nube:not([disabled])');
+
+            if (local || nube) {
+                const localMarcado = local && local.checked;
+                const nubeMarcado = nube && nube.checked;
+
+                if (!localMarcado && !nubeMarcado) {
+                    equiposSinCopia.push(nombreEquipo);
+                }
+            }
+        });
+
+        if (equiposSinCopia.length > 0) {
+            const mensaje = "⚠️ Los siguientes equipos no tienen marcada ni Local ni Nube:\n\n- " 
+                            + equiposSinCopia.join("\n- ") +
+                            "\n\n¿Deseas continuar de todas formas?";
+            
+            if (!confirm(mensaje)) {
+                e.preventDefault(); // ❌ Cancela el envío
+            }
+        }
+    });
+
+    // Mantener la lógica de 1/0 en los checkboxes
+    const checkboxes = formulario.querySelectorAll('.checkboxes');
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', function () {
+            cb.value = cb.checked ? "1" : "0";
         });
     });
-}
+
 //Validar dias domingos en el input type date
 const inputFecha = document.querySelector('.formularioFiltro__date');
 inputFecha.addEventListener('change', function () {
