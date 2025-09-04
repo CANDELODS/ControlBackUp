@@ -297,221 +297,511 @@ class IncrementalInformesController
     }
 
     //Exportar PDF de copias mensuales incrementales
-    public static function exportarPDFM()
-    {
-        if (!isAuth()) {
-            header('Location: /');
-            exit;
-        }
-
-        $fecha = $_GET['fecha'] ?? '';
-        if (!$fecha) {
-            header('Location: /incremental-descargar-diaria');
-            exit;
-        }
-        // Buscamos la copiaEncabezado por fecha
-        $copias = CopiasEncabezado::whereLike('fecha', $fecha, 1);
-        if (empty($copias)) {
-            echo "<script>alert('No se encontraron registros para la fecha seleccionada.');window.location.href='/incremental-descargar-diaria';</script>";
-            exit;
-        }
-
-        // Obtenemos los copiaDetalle relacionados con el mes seleccionado (1er parámetro: mes, 2do parámetro: tipo de copia)
-        $detalles = CopiasDetalle::allWhereMes($fecha, 1);
-        //Creamos la llave equipos dentro del objeto detalle y la buscamos por su id en la tabla equipos
-        foreach ($detalles as $detalle) {
-            $detalle->equipos = Equipos::find($detalle->idEquipos);
-        }
-
-        // Ordenar por nombre de equipo
-        usort($detalles, fn($a, $b) => strcmp($a->equipos->nombreEquipo, $b->equipos->nombreEquipo));
-
-        // Creamos un resumen de cada equipo
-        $resumen = [];
-        //Iteramos cada detalle
-        foreach ($detalles as $detalle) {
-            //Agregamos el nombre de cada uno de los equipos
-            $equipoNombre = $detalle->equipos->nombreEquipo ?? '';
-
-            if (!isset($resumen[$equipoNombre])) {
-                $resumen[$equipoNombre] = [
-                    'local'             => 0,
-                    'nube'              => 0,
-                    'total'             => 0,
-                    'evaluacion'        => '',
-                    // Validamos si el equipo tiene habilitado hacer copia local y/o en nube
-                    'habilitado_local'  => (int)($detalle->equipos->local ?? 0),
-                    'habilitado_nube'   => (int)($detalle->equipos->nube ?? 0),
-                ];
-            }
-
-            //Contamos la cantidad de copias locales y en nube
-            if ($detalle->copiaLocal == 1) {
-                $resumen[$equipoNombre]['local']++;
-            }
-            if ($detalle->copiaNube == 1) {
-                $resumen[$equipoNombre]['nube']++;
-            }
-
-            //Sumamos la cantidad de copias locales y en nube para obtener el total
-            $resumen[$equipoNombre]['total'] =
-                $resumen[$equipoNombre]['local'] + $resumen[$equipoNombre]['nube'];
-        }
-
-        // Creamos unos criterios de evaluación
-        //Exelente (16 o más), Bien (12 a 15), Mal (menos de 12)
-        foreach ($resumen as $eq => &$d) {
-            $t = $d['total'];
-            $d['evaluacion'] = $t >= 16 ? 'Excelente' : ($t >= 12 ? 'Bien' : 'Mal');
-        }
-        //Destruimos la variable para que no haya referencias inesperadas
-        unset($d);
-
-        // ======== Estadísticas (filtrando por habilitación) ========
-        // LOCAL
-        //filtramos los equipos que tienen habilitado hacer copia local
-        $ordenLocal = array_filter($resumen, fn($d) => !empty($d['habilitado_local']));
-        //Ordenamos de mayor a menor
-        uasort($ordenLocal, fn($a, $b) => $b['local'] <=> $a['local']);
-
-        // NUBE
-        //filtramos los equipos que tienen habilitado hacer copia en nube
-        $ordenNube = array_filter($resumen, fn($d) => !empty($d['habilitado_nube']));
-        //Ordenamos de mayor a menor
-        uasort($ordenNube, fn($a, $b) => $b['nube'] <=> $a['nube']);
-
-        // EXTRAER VALORES
-        //array_key_first: Devuelve la primera clave de un array sin afectar el puntero interno del array.
-        $masLocal   = !empty($ordenLocal) ? array_key_first($ordenLocal) : null;
-        //array_key_last: Devuelve la última clave de un array sin afectar el puntero interno del array.
-        $menosLocal = !empty($ordenLocal) ? array_key_last($ordenLocal)  : null;
-
-        $masNube    = !empty($ordenNube) ? array_key_first($ordenNube)   : null;
-        $menosNube  = !empty($ordenNube) ? array_key_last($ordenNube)    : null;
-
-        // Top/Bottom 3 (preservar claves)
-        //array_slice: Nos da un subarray con los 3 primeros elementos (conservando las claves si se pone true).
-        $top3Local     = array_slice($ordenLocal, 0, 3, true);
-        $bottom3Local  = array_slice($ordenLocal, -3, 3, true);
-
-        $top3Nube      = array_slice($ordenNube, 0, 3, true);
-        $bottom3Nube   = array_slice($ordenNube, -3, 3, true);
-
-        // TOTALES
-        //Obtenemos el valor total de las copias locales y en nube
-        $totalLocal  = array_sum(array_column($resumen, 'local'));
-        $totalNube   = array_sum(array_column($resumen, 'nube'));
-        //Obtenermos el total de todas las copias (local + nube)
-        $totalGlobal = $totalLocal + $totalNube;
-
-        // ================= PDF =================
-        $pdf = new \TCPDF();
-        $pdf->AddPage();
-
-        $pdf->SetFont('helvetica', 'B', 14);
-        $pdf->Cell(0, 10, "Informe Mensual Incremental - $fecha", 0, 1, 'C');
-
-        // Tabla principal
-        $html = '<table border="1" cellpadding="4">
-                <tr>
-                    <th>Equipo</th>
-                    <th>Local</th>
-                    <th>Nube</th>
-                    <th>Total</th>
-                    <th>Evaluación</th>
-                </tr>';
-        foreach ($resumen as $equipo => $datos) {
-            //Definimos el color de fondo dependiendo de la evaluación de cada equipo
-            $color = ($datos['evaluacion'] == 'Mal') ? ' style="background-color:#f8d7da;"'
-                : (($datos['evaluacion'] == 'Bien') ? ' style="background-color:#fff3cd;"'
-                    : ' style="background-color:#d4edda;"');
-            //Llenamos la tabla con la información de cada equipo
-            $html .= "<tr>
-                    <td>{$equipo}</td>
-                    <td>{$datos['local']}</td>
-                    <td>{$datos['nube']}</td>
-                    <td>{$datos['total']}</td>
-                    <td{$color}>{$datos['evaluacion']}</td>
-                  </tr>";
-        }
-        $html .= '</table>';
-        $pdf->writeHTML($html);
-
-        // Resumen estadístico
-        $pdf->Ln(10);
-        $pdf->SetFont('helvetica', 12);
-        $pdf->Cell(0, 10, "Resumen Estadístico", 0, 1);
-
-        $masLocalTxt   = $masLocal   ? "$masLocal ({$resumen[$masLocal]['local']})"   : 'Sin equipos habilitados';
-        $menosLocalTxt = $menosLocal ? "$menosLocal ({$resumen[$menosLocal]['local']})" : 'Sin equipos habilitados';
-        $masNubeTxt    = $masNube    ? "$masNube ({$resumen[$masNube]['nube']})"      : 'Sin equipos habilitados';
-        $menosNubeTxt  = $menosNube  ? "$menosNube ({$resumen[$menosNube]['nube']})"  : 'Sin equipos habilitados';
-
-        $html = "
-    <ul>
-        <li><b>Total de copias locales:</b> $totalLocal</li>
-        <li><b>Total de copias en nube:</b> $totalNube</li>
-        <li><b>Sumatoria de totales (Local + Nube):</b> $totalGlobal</li>
-        <li><b>Equipo con más copias locales:</b> $masLocalTxt</li>
-        <li><b>Equipo con menos copias locales:</b> $menosLocalTxt</li>
-        <li><b>Equipo con más copias en nube:</b> $masNubeTxt</li>
-        <li><b>Equipo con menos copias en nube:</b> $menosNubeTxt</li>
-    </ul>";
-        $pdf->writeHTML($html);
-
-        // Listas Top Equipos
-        $pdf->Ln(5);
-        $pdf->Cell(0, 10, "¿Cuales fueron los 3 equipos que hicieron más copias locales?", 0, 1);
-        if (empty($top3Local)) {
-            $pdf->Write(0, "Sin equipos habilitados para copias locales.", '', 0, '', true);
-        } else {
-            $html = '<ol>';
-            foreach ($top3Local as $eq => $d) {
-                $html .= "<li>$eq ({$d['local']})</li>";
-            }
-            $html .= '</ol>';
-            $pdf->writeHTML($html);
-        }
-
-        $pdf->Cell(0, 10, "¿Cuales fueron los 3 equipos que hicieron menos copias locales?", 0, 1);
-        if (empty($bottom3Local)) {
-            $pdf->Write(0, "Sin equipos habilitados para copias locales.", '', 0, '', true);
-        } else {
-            $html = '<ol>';
-            foreach ($bottom3Local as $eq => $d) {
-                $html .= "<li>$eq ({$d['local']})</li>";
-            }
-            $html .= '</ol>';
-            $pdf->writeHTML($html);
-        }
-
-        $pdf->Cell(0, 10, "¿Cuales fueron los 3 equipos que hicieron más copias en nube?", 0, 1);
-        if (empty($top3Nube)) {
-            $pdf->Write(0, "Sin equipos habilitados para copias en nube.", '', 0, '', true);
-        } else {
-            $html = '<ol>';
-            foreach ($top3Nube as $eq => $d) {
-                $html .= "<li>$eq ({$d['nube']})</li>";
-            }
-            $html .= '</ol>';
-            $pdf->writeHTML($html);
-        }
-
-        $pdf->Cell(0, 10, "¿Cuales fueron los 3 equipos que hicieron menos copias en nube?", 0, 1);
-        if (empty($bottom3Nube)) {
-            $pdf->Write(0, "Sin equipos habilitados para copias en nube.", '', 0, '', true);
-        } else {
-            $html = '<ol>';
-            foreach ($bottom3Nube as $eq => $d) {
-                $html .= "<li>$eq ({$d['nube']})</li>";
-            }
-            $html .= '</ol>';
-            $pdf->writeHTML($html);
-        }
-        //Mostramos el PDF en el navegador
-        $pdf->Output("Informe_Mensual_Incremental_$fecha.pdf", 'I');
+public static function exportarPDFM()
+{
+    if (!isAuth()) {
+        header('Location: /');
+        exit;
     }
 
+    $fecha = $_GET['fecha'] ?? '';
+    if (!$fecha) {
+        header('Location: /incremental-descargar-diaria');
+        exit;
+    }
+    // Buscamos la copiaEncabezado por fecha
+    $copias = CopiasEncabezado::whereLike('fecha', $fecha, 1);
+    if (empty($copias)) {
+        echo "<script>alert('No se encontraron registros para la fecha seleccionada.');window.location.href='/incremental-descargar-diaria';</script>";
+        exit;
+    }
+
+    // Obtenemos los copiaDetalle relacionados con el mes seleccionado (1er parámetro: mes, 2do parámetro: tipo de copia)
+    $detalles = CopiasDetalle::allWhereMes($fecha, 1);
+    //Creamos la llave equipos dentro del objeto detalle y la buscamos por su id en la tabla equipos
+    foreach ($detalles as $detalle) {
+        $detalle->equipos = Equipos::find($detalle->idEquipos);
+    }
+
+    // Ordenar por nombre de equipo
+    usort($detalles, fn($a, $b) => strcmp($a->equipos->nombreEquipo, $b->equipos->nombreEquipo));
+
+    // Creamos un resumen de cada equipo
+    $resumen = [];
+    //Iteramos cada detalle
+    foreach ($detalles as $detalle) {
+        //Agregamos el nombre de cada uno de los equipos
+        $equipoNombre = $detalle->equipos->nombreEquipo ?? '';
+
+        if (!isset($resumen[$equipoNombre])) {
+            $resumen[$equipoNombre] = [
+                'local'             => 0,
+                'nube'              => 0,
+                'total'             => 0,
+                'evaluacion'        => '',
+                // Validamos si el equipo tiene habilitado hacer copia local y/o en nube
+                'habilitado_local'  => (int)($detalle->equipos->local ?? 0),
+                'habilitado_nube'   => (int)($detalle->equipos->nube ?? 0),
+                // NUEVO: bandera para saber si es crítico
+                'critico'           => (int)($detalle->equipos->critico ?? 0),
+            ];
+        }
+
+        //Contamos la cantidad de copias locales y en nube
+        if ($detalle->copiaLocal == 1) {
+            $resumen[$equipoNombre]['local']++;
+        }
+        if ($detalle->copiaNube == 1) {
+            $resumen[$equipoNombre]['nube']++;
+        }
+
+        //Sumamos la cantidad de copias locales y en nube para obtener el total
+        $resumen[$equipoNombre]['total'] =
+            $resumen[$equipoNombre]['local'] + $resumen[$equipoNombre]['nube'];
+    }
+
+    // Creamos unos criterios de evaluación
+    //Exelente (16 o más), Bien (12 a 15), Mal (menos de 12)
+    foreach ($resumen as $eq => &$d) {
+        $t = $d['total'];
+        $d['evaluacion'] = $t >= 16 ? 'Excelente' : ($t >= 12 ? 'Bien' : 'Mal');
+    }
+    //Destruimos la variable para que no haya referencias inesperadas
+    unset($d);
+
+    // ======== Estadísticas (filtrando por habilitación) ========
+    // LOCAL
+    //filtramos los equipos que tienen habilitado hacer copia local
+    $ordenLocal = array_filter($resumen, fn($d) => !empty($d['habilitado_local']));
+    //Ordenamos de mayor a menor
+    uasort($ordenLocal, fn($a, $b) => $b['local'] <=> $a['local']);
+
+    // NUBE
+    //filtramos los equipos que tienen habilitado hacer copia en nube
+    $ordenNube = array_filter($resumen, fn($d) => !empty($d['habilitado_nube']));
+    //Ordenamos de mayor a menor
+    uasort($ordenNube, fn($a, $b) => $b['nube'] <=> $a['nube']);
+
+    // EXTRAER VALORES
+    //array_key_first: Devuelve la primera clave de un array sin afectar el puntero interno del array.
+    $masLocal   = !empty($ordenLocal) ? array_key_first($ordenLocal) : null;
+    //array_key_last: Devuelve la última clave de un array sin afectar el puntero interno del array.
+    $menosLocal = !empty($ordenLocal) ? array_key_last($ordenLocal)  : null;
+
+    $masNube    = !empty($ordenNube) ? array_key_first($ordenNube)   : null;
+    $menosNube  = !empty($ordenNube) ? array_key_last($ordenNube)    : null;
+
+    // Top/Bottom 3 (preservar claves)
+    //array_slice: Nos da un subarray con los 3 primeros elementos (conservando las claves si se pone true).
+    $top3Local     = array_slice($ordenLocal, 0, 3, true);
+    $bottom3Local  = array_slice($ordenLocal, -3, 3, true);
+
+    $top3Nube      = array_slice($ordenNube, 0, 3, true);
+    $bottom3Nube   = array_slice($ordenNube, -3, 3, true);
+
+    // TOTALES
+    //Obtenemos el valor total de las copias locales y en nube
+    $totalLocal  = array_sum(array_column($resumen, 'local'));
+    $totalNube   = array_sum(array_column($resumen, 'nube'));
+    //Obtenermos el total de todas las copias (local + nube)
+    $totalGlobal = $totalLocal + $totalNube;
+
+    // ================= PDF =================
+    $pdf = new \TCPDF();
+    $pdf->AddPage();
+
+    $pdf->SetFont('helvetica', 'B', 14);
+    $pdf->Cell(0, 10, "Informe Mensual Incremental - $fecha", 0, 1, 'C');
+
+    // Tabla principal
+    $html = '<table border="1" cellpadding="4">
+            <tr>
+                <th>Equipo</th>
+                <th>Local</th>
+                <th>Nube</th>
+                <th>Total</th>
+                <th>Evaluación</th>
+            </tr>';
+    foreach ($resumen as $equipo => $datos) {
+        //Definimos el color de fondo dependiendo de la evaluación de cada equipo
+        $color = ($datos['evaluacion'] == 'Mal') ? ' style="background-color:#f8d7da;"'
+            : (($datos['evaluacion'] == 'Bien') ? ' style="background-color:#fff3cd;"'
+                : ' style="background-color:#d4edda;"');
+
+        // NUEVO: si el equipo es crítico, aplicamos un color de alerta (naranja suave)
+        $rowStyle = $datos['critico'] ? ' style="background-color:#ffeeba;"' : '';
+
+        //Llenamos la tabla con la información de cada equipo
+        $html .= "<tr{$rowStyle}>
+                <td>{$equipo}" . ($datos['critico'] ? ' (Crítico)' : '') . "</td>
+                <td>{$datos['local']}</td>
+                <td>{$datos['nube']}</td>
+                <td>{$datos['total']}</td>
+                <td{$color}>{$datos['evaluacion']}</td>
+              </tr>";
+    }
+    $html .= '</table>';
+    $pdf->writeHTML($html);
+
+    // Resumen estadístico
+    $pdf->Ln(10);
+    $pdf->SetFont('helvetica', 12);
+    $pdf->Cell(0, 10, "Resumen Estadístico", 0, 1);
+
+    // Restauramos los textos del resumen general (y añadimos marca de crítico si aplica)
+    $masLocalTxt   = $masLocal
+        ? $masLocal . (!empty($resumen[$masLocal]['critico']) ? ' (Crítico)' : '') . " ({$resumen[$masLocal]['local']})"
+        : 'Sin equipos habilitados';
+    $menosLocalTxt = $menosLocal
+        ? $menosLocal . (!empty($resumen[$menosLocal]['critico']) ? ' (Crítico)' : '') . " ({$resumen[$menosLocal]['local']})"
+        : 'Sin equipos habilitados';
+    $masNubeTxt    = $masNube
+        ? $masNube . (!empty($resumen[$masNube]['critico']) ? ' (Crítico)' : '') . " ({$resumen[$masNube]['nube']})"
+        : 'Sin equipos habilitados';
+    $menosNubeTxt  = $menosNube
+        ? $menosNube . (!empty($resumen[$menosNube]['critico']) ? ' (Crítico)' : '') . " ({$resumen[$menosNube]['nube']})"
+        : 'Sin equipos habilitados';
+
+    $html = "
+<ul>
+    <li><b>Total de copias locales:</b> $totalLocal</li>
+    <li><b>Total de copias en nube:</b> $totalNube</li>
+    <li><b>Sumatoria de totales (Local + Nube):</b> $totalGlobal</li>
+    <li><b>Equipo con más copias locales:</b> $masLocalTxt</li>
+    <li><b>Equipo con menos copias locales:</b> $menosLocalTxt</li>
+    <li><b>Equipo con más copias en nube:</b> $masNubeTxt</li>
+    <li><b>Equipo con menos copias en nube:</b> $menosNubeTxt</li>
+</ul>";
+    $pdf->writeHTML($html);
+
+    // ====== NUEVO BLOQUE: Resumen especial de críticos ======
+    $pdf->Ln(5);
+    $pdf->SetFont('helvetica', 'B', 12);
+    $pdf->Cell(0, 10, "Resumen de Equipos Críticos", 0, 1);
+
+    $criticos = array_filter($resumen, fn($d) => !empty($d['critico']));
+
+    if (!empty($criticos)) {
+        // Mayor en Local (entre críticos)
+        uasort($criticos, fn($a, $b) => $b['local'] <=> $a['local']);
+        $masLocalCritico = array_key_first($criticos);
+        // Mayor en Nube (entre críticos)
+        uasort($criticos, fn($a, $b) => $b['nube'] <=> $a['nube']);
+        $masNubeCritico = array_key_first($criticos);
+
+        $html = "<ul>
+            <li><b>Equipo crítico con más copias locales:</b> $masLocalCritico ({$resumen[$masLocalCritico]['local']})</li>
+            <li><b>Equipo crítico con más copias en nube:</b> $masNubeCritico ({$resumen[$masNubeCritico]['nube']})</li>
+        </ul>";
+        $pdf->writeHTML($html);
+    } else {
+        $pdf->Write(0, "No existen equipos críticos en este período.", '', 0, '', true);
+    }
+
+    // Listas Top Equipos
+    $pdf->Ln(5);
+    $pdf->Cell(0, 10, "¿Cuales fueron los 3 equipos que hicieron más copias locales?", 0, 1);
+    if (empty($top3Local)) {
+        $pdf->Write(0, "Sin equipos habilitados para copias locales.", '', 0, '', true);
+    } else {
+        $html = '<ol>';
+        foreach ($top3Local as $eq => $d) {
+            // NUEVO: marcar críticos en Top/Bottom
+            $nombre = $eq . (!empty($resumen[$eq]['critico']) ? ' <span style="color:red;">(Crítico)</span>' : '');
+            $html .= "<li>$nombre ({$d['local']})</li>";
+        }
+        $html .= '</ol>';
+        $pdf->writeHTML($html);
+    }
+
+    $pdf->Cell(0, 10, "¿Cuales fueron los 3 equipos que hicieron menos copias locales?", 0, 1);
+    if (empty($bottom3Local)) {
+        $pdf->Write(0, "Sin equipos habilitados para copias locales.", '', 0, '', true);
+    } else {
+        $html = '<ol>';
+        foreach ($bottom3Local as $eq => $d) {
+            $nombre = $eq . (!empty($resumen[$eq]['critico']) ? ' <span style="color:red;">(Crítico)</span>' : '');
+            $html .= "<li>$nombre ({$d['local']})</li>";
+        }
+        $html .= '</ol>';
+        $pdf->writeHTML($html);
+    }
+
+    $pdf->Cell(0, 10, "¿Cuales fueron los 3 equipos que hicieron más copias en nube?", 0, 1);
+    if (empty($top3Nube)) {
+        $pdf->Write(0, "Sin equipos habilitados para copias en nube.", '', 0, '', true);
+    } else {
+        $html = '<ol>';
+        foreach ($top3Nube as $eq => $d) {
+            $nombre = $eq . (!empty($resumen[$eq]['critico']) ? ' <span style="color:red;">(Crítico)</span>' : '');
+            $html .= "<li>$nombre ({$d['nube']})</li>";
+        }
+        $html .= '</ol>';
+        $pdf->writeHTML($html);
+    }
+
+    $pdf->Cell(0, 10, "¿Cuales fueron los 3 equipos que hicieron menos copias en nube?", 0, 1);
+    if (empty($bottom3Nube)) {
+        $pdf->Write(0, "Sin equipos habilitados para copias en nube.", '', 0, '', true);
+    } else {
+        $html = '<ol>';
+        foreach ($bottom3Nube as $eq => $d) {
+            $nombre = $eq . (!empty($resumen[$eq]['critico']) ? ' <span style="color:red;">(Crítico)</span>' : '');
+            $html .= "<li>$nombre ({$d['nube']})</li>";
+        }
+        $html .= '</ol>';
+        $pdf->writeHTML($html);
+    }
+
+    //Mostramos el PDF en el navegador
+    $pdf->Output("Informe_Mensual_Incremental_$fecha.pdf", 'I');
+}
+
+
+//     public static function exportarPDFM()
+// {
+//     if (!isAuth()) {
+//         header('Location: /');
+//         exit;
+//     }
+
+//     $fecha = $_GET['fecha'] ?? '';
+//     if (!$fecha) {
+//         header('Location: /incremental-descargar-diaria');
+//         exit;
+//     }
+//     // Buscamos la copiaEncabezado por fecha
+//     $copias = CopiasEncabezado::whereLike('fecha', $fecha, 1);
+//     if (empty($copias)) {
+//         echo "<script>alert('No se encontraron registros para la fecha seleccionada.');window.location.href='/incremental-descargar-diaria';</script>";
+//         exit;
+//     }
+
+//     // Obtenemos los copiaDetalle relacionados con el mes seleccionado (1er parámetro: mes, 2do parámetro: tipo de copia)
+//     $detalles = CopiasDetalle::allWhereMes($fecha, 1);
+//     //Creamos la llave equipos dentro del objeto detalle y la buscamos por su id en la tabla equipos
+//     foreach ($detalles as $detalle) {
+//         $detalle->equipos = Equipos::find($detalle->idEquipos);
+//     }
+
+//     // Ordenar por nombre de equipo
+//     usort($detalles, fn($a, $b) => strcmp($a->equipos->nombreEquipo, $b->equipos->nombreEquipo));
+
+//     // Creamos un resumen de cada equipo
+//     $resumen = [];
+//     //Iteramos cada detalle
+//     foreach ($detalles as $detalle) {
+//         //Agregamos el nombre de cada uno de los equipos
+//         $equipoNombre = $detalle->equipos->nombreEquipo ?? '';
+
+//         if (!isset($resumen[$equipoNombre])) {
+//             $resumen[$equipoNombre] = [
+//                 'local'             => 0,
+//                 'nube'              => 0,
+//                 'total'             => 0,
+//                 'evaluacion'        => '',
+//                 // Validamos si el equipo tiene habilitado hacer copia local y/o en nube
+//                 'habilitado_local'  => (int)($detalle->equipos->local ?? 0),
+//                 'habilitado_nube'   => (int)($detalle->equipos->nube ?? 0),
+//                 // Nuevo: guardar si es crítico
+//                 'critico'           => (int)($detalle->equipos->critico ?? 0),
+//             ];
+//         }
+
+//         //Contamos la cantidad de copias locales y en nube
+//         if ($detalle->copiaLocal == 1) {
+//             $resumen[$equipoNombre]['local']++;
+//         }
+//         if ($detalle->copiaNube == 1) {
+//             $resumen[$equipoNombre]['nube']++;
+//         }
+
+//         //Sumamos la cantidad de copias locales y en nube para obtener el total
+//         $resumen[$equipoNombre]['total'] =
+//             $resumen[$equipoNombre]['local'] + $resumen[$equipoNombre]['nube'];
+//     }
+
+//     // Creamos unos criterios de evaluación
+//     //Exelente (16 o más), Bien (12 a 15), Mal (menos de 12)
+//     foreach ($resumen as $eq => &$d) {
+//         $t = $d['total'];
+//         $d['evaluacion'] = $t >= 16 ? 'Excelente' : ($t >= 12 ? 'Bien' : 'Mal');
+//     }
+//     //Destruimos la variable para que no haya referencias inesperadas
+//     unset($d);
+
+//     // ======== Estadísticas (filtrando por habilitación) ========
+//     // LOCAL
+//     //filtramos los equipos que tienen habilitado hacer copia local
+//     $ordenLocal = array_filter($resumen, fn($d) => !empty($d['habilitado_local']));
+//     //Ordenamos de mayor a menor
+//     uasort($ordenLocal, fn($a, $b) => $b['local'] <=> $a['local']);
+
+//     // NUBE
+//     //filtramos los equipos que tienen habilitado hacer copia en nube
+//     $ordenNube = array_filter($resumen, fn($d) => !empty($d['habilitado_nube']));
+//     //Ordenamos de mayor a menor
+//     uasort($ordenNube, fn($a, $b) => $b['nube'] <=> $a['nube']);
+
+//     // EXTRAER VALORES
+//     $masLocal   = !empty($ordenLocal) ? array_key_first($ordenLocal) : null;
+//     $menosLocal = !empty($ordenLocal) ? array_key_last($ordenLocal)  : null;
+
+//     $masNube    = !empty($ordenNube) ? array_key_first($ordenNube)   : null;
+//     $menosNube  = !empty($ordenNube) ? array_key_last($ordenNube)    : null;
+
+//     // Top/Bottom 3 (preservar claves)
+//     $top3Local     = array_slice($ordenLocal, 0, 3, true);
+//     $bottom3Local  = array_slice($ordenLocal, -3, 3, true);
+
+//     $top3Nube      = array_slice($ordenNube, 0, 3, true);
+//     $bottom3Nube   = array_slice($ordenNube, -3, 3, true);
+
+//     // TOTALES
+//     $totalLocal  = array_sum(array_column($resumen, 'local'));
+//     $totalNube   = array_sum(array_column($resumen, 'nube'));
+//     $totalGlobal = $totalLocal + $totalNube;
+
+//     // ================= PDF =================
+//     $pdf = new \TCPDF();
+//     $pdf->AddPage();
+
+//     $pdf->SetFont('helvetica', 'B', 14);
+//     $pdf->Cell(0, 10, "Informe Mensual Incremental - $fecha", 0, 1, 'C');
+
+//     // Tabla principal
+//     $html = '<table border="1" cellpadding="4">
+//             <tr>
+//                 <th>Equipo</th>
+//                 <th>Local</th>
+//                 <th>Nube</th>
+//                 <th>Total</th>
+//                 <th>Evaluación</th>
+//             </tr>';
+//     foreach ($resumen as $equipo => $datos) {
+//         //Definimos el color de fondo dependiendo de la evaluación de cada equipo
+//         $color = ($datos['evaluacion'] == 'Mal') ? ' style="background-color:#f8d7da;"'
+//             : (($datos['evaluacion'] == 'Bien') ? ' style="background-color:#fff3cd;"'
+//                 : ' style="background-color:#d4edda;"');
+
+//         // Nuevo: si el equipo es crítico, agregamos color azul suave
+//         $criticoStyle = $datos['critico'] ? ' style="background-color:#cce5ff;"' : '';
+
+//         // Si es crítico, aplicamos el estilo azul al <tr>, de lo contrario solo usamos el color de evaluación
+//         $rowStyle = $datos['critico'] ? $criticoStyle : '';
+
+//         //Llenamos la tabla con la información de cada equipo
+//         $html .= "<tr{$rowStyle}>
+//                 <td>{$equipo}" . ($datos['critico'] ? ' (Crítico)' : '') . "</td>
+//                 <td>{$datos['local']}</td>
+//                 <td>{$datos['nube']}</td>
+//                 <td>{$datos['total']}</td>
+//                 <td{$color}>{$datos['evaluacion']}</td>
+//               </tr>";
+//     }
+//     $html .= '</table>';
+//     $pdf->writeHTML($html);
+
+//     // Resumen estadístico
+//     $pdf->Ln(10);
+//     $pdf->SetFont('helvetica', 12);
+//     $pdf->Cell(0, 10, "Resumen Estadístico", 0, 1);
+
+//     $masLocalTxt   = $masLocal   ? "$masLocal ({$resumen[$masLocal]['local']})"   : 'Sin equipos habilitados';
+//     $menosLocalTxt = $menosLocal ? "$menosLocal ({$resumen[$menosLocal]['local']})" : 'Sin equipos habilitados';
+//     $masNubeTxt    = $masNube    ? "$masNube ({$resumen[$masNube]['nube']})"      : 'Sin equipos habilitados';
+//     $menosNubeTxt  = $menosNube  ? "$menosNube ({$resumen[$menosNube]['nube']})"  : 'Sin equipos habilitados';
+
+//     $html = "
+// <ul>
+//     <li><b>Total de copias locales:</b> $totalLocal</li>
+//     <li><b>Total de copias en nube:</b> $totalNube</li>
+//     <li><b>Sumatoria de totales (Local + Nube):</b> $totalGlobal</li>
+//     <li><b>Equipo con más copias locales:</b> $masLocalTxt</li>
+//     <li><b>Equipo con menos copias locales:</b> $menosLocalTxt</li>
+//     <li><b>Equipo con más copias en nube:</b> $masNubeTxt</li>
+//     <li><b>Equipo con menos copias en nube:</b> $menosNubeTxt</li>
+// </ul>";
+//     $pdf->writeHTML($html);
+
+//     // ====== NUEVO BLOQUE: Resumen especial de críticos ======
+//     $pdf->Ln(10);
+//     $pdf->SetFont('helvetica', 'B', 12);
+//     $pdf->Cell(0, 10, "Resumen de Equipos Críticos", 0, 1);
+
+//     // Filtramos solo los equipos críticos
+//     $criticos = array_filter($resumen, fn($d) => !empty($d['critico']));
+
+//     if (!empty($criticos)) {
+//         // Ordenamos por local
+//         uasort($criticos, fn($a, $b) => $b['local'] <=> $a['local']);
+//         $masLocalCritico = array_key_first($criticos);
+
+//         // Ordenamos por nube
+//         uasort($criticos, fn($a, $b) => $b['nube'] <=> $a['nube']);
+//         $masNubeCritico = array_key_first($criticos);
+
+//         $html = "<ul>
+//             <li><b>Equipo crítico con más copias locales:</b> $masLocalCritico ({$resumen[$masLocalCritico]['local']})</li>
+//             <li><b>Equipo crítico con más copias en nube:</b> $masNubeCritico ({$resumen[$masNubeCritico]['nube']})</li>
+//         </ul>";
+//         $pdf->writeHTML($html);
+//     } else {
+//         $pdf->Write(0, "No existen equipos críticos en este período.", '', 0, '', true);
+//     }
+
+//     // Listas Top Equipos
+//     $pdf->Ln(5);
+//     $pdf->Cell(0, 10, "¿Cuales fueron los 3 equipos que hicieron más copias locales?", 0, 1);
+//     if (empty($top3Local)) {
+//         $pdf->Write(0, "Sin equipos habilitados para copias locales.", '', 0, '', true);
+//     } else {
+//         $html = '<ol>';
+//         foreach ($top3Local as $eq => $d) {
+//             $html .= "<li>$eq ({$d['local']})</li>";
+//         }
+//         $html .= '</ol>';
+//         $pdf->writeHTML($html);
+//     }
+
+//     $pdf->Cell(0, 10, "¿Cuales fueron los 3 equipos que hicieron menos copias locales?", 0, 1);
+//     if (empty($bottom3Local)) {
+//         $pdf->Write(0, "Sin equipos habilitados para copias locales.", '', 0, '', true);
+//     } else {
+//         $html = '<ol>';
+//         foreach ($bottom3Local as $eq => $d) {
+//             $html .= "<li>$eq ({$d['local']})</li>";
+//         }
+//         $html .= '</ol>';
+//         $pdf->writeHTML($html);
+//     }
+
+//     $pdf->Cell(0, 10, "¿Cuales fueron los 3 equipos que hicieron más copias en nube?", 0, 1);
+//     if (empty($top3Nube)) {
+//         $pdf->Write(0, "Sin equipos habilitados para copias en nube.", '', 0, '', true);
+//     } else {
+//         $html = '<ol>';
+//         foreach ($top3Nube as $eq => $d) {
+//             $html .= "<li>$eq ({$d['nube']})</li>";
+//         }
+//         $html .= '</ol>';
+//         $pdf->writeHTML($html);
+//     }
+
+//     $pdf->Cell(0, 10, "¿Cuales fueron los 3 equipos que hicieron menos copias en nube?", 0, 1);
+//     if (empty($bottom3Nube)) {
+//         $pdf->Write(0, "Sin equipos habilitados para copias en nube.", '', 0, '', true);
+//     } else {
+//         $html = '<ol>';
+//         foreach ($bottom3Nube as $eq => $d) {
+//             $html .= "<li>$eq ({$d['nube']})</li>";
+//         }
+//         $html .= '</ol>';
+//         $pdf->writeHTML($html);
+//     }
+//     //Mostramos el PDF en el navegador
+//     $pdf->Output("Informe_Mensual_Incremental_$fecha.pdf", 'I');
+// }
 
     //Exportar Excel de copias diarias incrementales
     public static function exportarExcel()
