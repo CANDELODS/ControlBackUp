@@ -69,3 +69,41 @@
 <!-- Si el equipo en su atributo 'nube' es = 1 (Si) entonces agregamos el atributo checked 
  al checkbox, de lo contrario no lo ponemos (Edición)-->
 </div>
+
+<div class="eformulario__campo">
+    <label class="eformulario__label" for="critico">¿Crítico?</label>
+    <input type="hidden" name="critico"
+        value="0"
+        id="critico">
+    <input type="checkbox"
+        id="critico"
+        class="eformulario__input eformulario__input--check"
+        name="critico"
+        value="1"
+        <?php if ($equipos->critico === '1') { ?>
+        checked>
+<?php } else { ?>
+    >
+<?php } ?>
+<!-- Si el equipo en su atributo 'critico' es = 1 (Si) entonces agregamos el atributo checked 
+ al checkbox, de lo contrario no lo ponemos (Edición)-->
+</div>
+
+<div class="eformulario__campo">
+    <label class="eformulario__label" for="habilitado">¿Habilitado?</label>
+    <input type="hidden" name="habilitado"
+        value="0"
+        id="habilitado">
+    <input type="checkbox"
+        id="habilitado"
+        class="eformulario__input eformulario__input--check"
+        name="habilitado"
+        value="1"
+        <?php if ($equipos->habilitado === '1') { ?>
+        checked>
+<?php } else { ?>
+    >
+<?php } ?>
+<!-- Si el equipo en su atributo 'critico' es = 1 (Si) entonces agregamos el atributo checked 
+ al checkbox, de lo contrario no lo ponemos (Edición)-->
+</div>

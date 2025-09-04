@@ -20,6 +20,8 @@
                         <th scope="col" class="table__th">Área</th>
                         <th scope="col" class="table__th">Local</th>
                         <th scope="col" class="table__th">Nube</th>
+                        <th scope="col" class="table__th">Crítico</th>
+                        <th scope="col" class="table__th">Habilitado</th>
                         <th scope="col" class="table__th"></th>
                     </tr>
                 </thead>
@@ -42,6 +44,14 @@
                             <td data-label="Nube" class="table__td">
                                 <!-- Mostramos si el equipo hace copia en nube -->
                                 <?php echo $equipo->nube; ?>
+                            </td>
+                            <td data-label="Critico" class="table__td">
+                                <!-- Mostramos si el equipo es crítico -->
+                                <?php echo $equipo->critico; ?>
+                            </td>
+                            <td data-label="Habilitado" class="table__td">
+                                <!-- Mostramos si el equipo está habilitado -->
+                                <?php echo $equipo->habilitado; ?>
                             </td>
                             <td class="table__td--acciones">
                                 <!-- Enlace para redirigir al usuario a la vista de editar-equipo, además se manda el id del equipo a editar

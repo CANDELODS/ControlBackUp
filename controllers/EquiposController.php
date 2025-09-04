@@ -54,6 +54,8 @@ class EquiposController
                 //Si hay algo, lo convertimos a un string para mostrarlo en la vista
                 $equipo->local = $equipo->local ? 'Sí' : 'No';
                 $equipo->nube = $equipo->nube ? 'Sí' : 'No';
+                $equipo->critico = $equipo->critico ? 'Sí' : 'No';
+                $equipo->habilitado = $equipo->habilitado ? 'Sí' : 'No';
             }
         }
         // Renderizamos la vista y enviamos las variables a la vista
