@@ -81,7 +81,7 @@ class InformeCompletoController
         ]);
     }
 
-     public static function exportarPDF()
+    public static function exportarPDF()
     {
         if (!isAuth()) {
             header('Location: /');
@@ -105,7 +105,7 @@ class InformeCompletoController
         foreach ($detalles as $detalle) {
             $detalle->equipos = Equipos::find($detalle->idEquipos);
         }
-        
+
 
         // Ordenar por nombre de equipo
         usort($detalles, fn($a, $b) => strcmp($a->equipos->nombreEquipo, $b->equipos->nombreEquipo));
@@ -126,6 +126,7 @@ class InformeCompletoController
                     // Validamos si el equipo tiene habilitado hacer copia local y/o en nube
                     'habilitado_local'  => (int)($detalle->equipos->local ?? 0),
                     'habilitado_nube'   => (int)($detalle->equipos->nube ?? 0),
+                    'critico'           => (int)($detalle->equipos->critico ?? 0),
                 ];
             }
 
@@ -209,9 +210,12 @@ class InformeCompletoController
             $color = ($datos['evaluacion'] == 'Mal') ? ' style="background-color:#f8d7da;"'
                 : (($datos['evaluacion'] == 'Bien') ? ' style="background-color:#fff3cd;"'
                     : ' style="background-color:#d4edda;"');
+
+            // Resaltar equipos críticos (resalta la fila completa)
+            $rowStyle = $datos['critico'] ? ' style="background-color:#FFF176;"' : '';
             //Llenamos la tabla con la información de cada equipo
-            $html .= "<tr>
-                    <td>{$equipo}</td>
+            $html .= "<tr{$rowStyle}>
+                    <td>{$equipo}" . ($datos['critico'] ? ' (Crítico)' : '') . "</td>
                     <td>{$datos['local']}</td>
                     <td>{$datos['nube']}</td>
                     <td>{$datos['total']}</td>
@@ -338,6 +342,7 @@ class InformeCompletoController
                     'evaluacion' => '',
                     'habilitado_local' => (int)($detalle->equipos->local ?? 0),
                     'habilitado_nube'  => (int)($detalle->equipos->nube ?? 0),
+                    'critico' => (int)($detalle->equipos->critico ?? 0),
                 ];
             }
             if ($detalle->copiaLocal == 1) $resumen[$equipo]['local']++;
@@ -406,6 +411,13 @@ class InformeCompletoController
             $sheet->getStyle("E{$fila}")->getFill()
                 ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                 ->getStartColor()->setRGB($color);
+
+            // ✅ Resaltar equipos críticos (solo columnas A-D)
+            if (isset($d['critico']) && $d['critico'] == 1) {
+                $sheet->getStyle("A{$fila}:D{$fila}")->getFill()
+                    ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                    ->getStartColor()->setRGB('FFF176'); // amarillo alerta
+            }
             $fila++;
         }
 
@@ -650,5 +662,4 @@ class InformeCompletoController
         $writer->save('php://output');
         exit;
     }
-
 }
