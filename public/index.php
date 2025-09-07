@@ -72,6 +72,6 @@ $router->post('/eliminar-copia', [CopiasController::class, 'eliminar']);
 
 // Consejos
 $router->get('/consejos', [ConsejosController::class, 'consejos']);
-$router->post('/consejos', [ConsejosController::class, 'consejos']);
+$router->get('/consejos/instalacion-cobian', [ConsejosController::class, 'consejosICB']);
 
 $router->comprobarRutas();

@@ -9,13 +9,17 @@ class ConsejosController
 {
     public static function consejos(Router $router)
     {
-
-
-        $alertas = Usuario::getAlertas();
         // Render a la vista 
         $router->render('consejos/consejos', [
-            'titulo' => 'Consejos',
-            'alertas' => $alertas
+            'titulo' => 'Consejos'
+        ]);
+    }
+
+        public static function consejosICB(Router $router)
+    {
+        // Render a la vista 
+        $router->render('consejos/instalacionCobian', [
+            'titulo' => 'Instalación de Cobian Backup'
         ]);
     }
 }

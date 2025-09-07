@@ -1,0 +1,66 @@
+@use 'base/variables' as v;
+@use 'base/mixins' as m;
+
+.consejos {
+    @include m.contenedor;
+
+    &__grid {
+        @include m.grid(2, 1rem);
+        justify-items: center;
+    }
+}
+
+.box {
+    display: flex;
+    flex-direction: column;
+    @include m.sombraConsejos;
+    padding: 1.5rem;
+    gap: 2rem;
+    width: 80%;
+    border-radius: 1rem;
+    min-height: 35rem; // 👈 ajusta según el alto que quieras para todas las cards
+    transition: box-shadow 0.5s ease;
+
+    &:hover {
+        box-shadow: none;
+    }
+
+    &__img {
+        width: 100%;
+        border-radius: 1rem;
+        max-height: 10rem; // 👈 evita que la imagen haga crecer demasiado la card
+        object-fit: contain;
+    }
+
+    &__contenido {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly; // 👈 separa título/texto y botón
+        flex-grow: 1; // 👈 ocupa todo el espacio disponible
+        width: 100%;
+    }
+
+    &__h2 {
+        font-size: 2.4rem;
+        margin-bottom: 1rem;
+    }
+
+    &__p {
+        margin-bottom: 1rem;
+        font-size: 1.6rem;
+
+        // Estilos para cortar el texto
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+    &__btn {
+        @include m.botonDos(black, v.$blanco);
+        align-self: flex-end; // 👈 botón a la derecha
+        width: auto;
+    }
+}
