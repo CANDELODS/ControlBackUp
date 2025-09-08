@@ -2,9 +2,9 @@
 
      <a href="/principal" class="header__logo">
          <picture>
-             <source srcset="build/img/logo.avif" type="image/avif">
-             <source srcset="build/img/logo.webp" type="image/webp">
-             <img src="build/img/logo.png" alt="Logo Ladrillera"
+             <source srcset="/build/img/logo.avif" type="image/avif">
+             <source srcset="/build/img/logo.webp" type="image/webp">
+             <img src="/build/img/logo.png" alt="Logo Ladrillera"
                  class="header__img" loading="lazy" width="200" heigth="300">
          </picture>
      </a>

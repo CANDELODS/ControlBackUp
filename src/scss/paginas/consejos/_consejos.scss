@@ -5,8 +5,13 @@
     @include m.contenedor;
 
     &__grid {
-        @include m.grid(2, 1rem);
+        @include m.grid(1, 1rem);
         justify-items: center;
+        gap: 3rem;
+        @include m.tablet {
+            @include m.grid(2, 1rem);
+
+        }
     }
 }
 

@@ -385,8 +385,16 @@ h3 {
 .consejos__grid {
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(1, 1fr);
   justify-items: center;
+  gap: 3rem;
+}
+@media (min-width: 768px) {
+  .consejos__grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 .box {
@@ -1486,6 +1494,9 @@ h3 {
 .main__h1 {
   color: #ED241C;
 }
+.main__h2 {
+  margin-top: 1.5rem;
+}
 .main__p {
   margin: 1rem 0 0 0;
 }
@@ -1608,5 +1619,48 @@ h3 {
     gap: 2rem;
     margin-top: 0;
   }
+}
+
+.cards {
+  width: min(95%, 120rem);
+  margin: 0 auto;
+}
+
+.card__grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(1, 1fr);
+  justify-items: center;
+}
+@media (min-width: 768px) {
+  .card__grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.card__a {
+  background-color: #ED241C;
+  padding: 1.5rem 4rem;
+  color: #FFFFFF;
+  font-size: 1.8rem;
+  font-weight: 700;
+  border: none;
+  transition-property: background-color, box-shadow;
+  transition-duration: 0.3s;
+  text-align: center;
+  text-transform: uppercase;
+  width: 100%;
+  display: inline-block;
+  border-radius: 0.5rem;
+  border: 2px solid transparent;
+  transition: border, box-shadow, background-color 0.5s ease;
+  width: auto;
+}
+.card__a:hover {
+  border: 2px solid #ED241C;
+  box-shadow: 0 0 10px #ED241C;
+  background-color: transparent;
+  cursor: pointer;
 }
 /*# sourceMappingURL=app.css.map */

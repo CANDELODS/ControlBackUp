@@ -1,0 +1,49 @@
+@use 'base/mixins' as m;
+@use 'base/variables' as v;
+
+.cards{
+    @include m.contenedor;
+}
+
+.card{
+
+    &__grid{
+        @include m.grid(1, 1rem);
+        justify-items: center;
+        @include m.tablet{
+            @include m.grid(2, 1rem);
+        }
+    }
+
+    &__img-Div{
+
+    }
+
+    &__img{
+
+    }
+
+    &__contenido{
+
+    }
+
+    &__h3{
+
+    }
+
+    &__p{
+
+        &--guia{
+            @extend .card__p;
+        }
+    }
+
+    &__h4{
+
+    }
+
+    &__a{
+        @include m.boton(v.$principal, v.$blanco);
+        width: auto;
+    }
+}

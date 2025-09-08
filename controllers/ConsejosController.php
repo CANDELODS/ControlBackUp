@@ -9,16 +9,44 @@ class ConsejosController
 {
     public static function consejos(Router $router)
     {
+        if (!isAuth()) {
+            header('Location: /');
+        }
         // Render a la vista 
         $router->render('consejos/consejos', [
             'titulo' => 'Consejos'
         ]);
     }
 
-        public static function consejosICB(Router $router)
+    public static function consejosICB(Router $router)
     {
+        if (!isAuth()) {
+            header('Location: /');
+        }
         // Render a la vista 
         $router->render('consejos/instalacionCobian', [
+            'titulo' => 'Instalación de Cobian Backup'
+        ]);
+    }
+
+        public static function consejosEVSC(Router $router)
+    {
+        if (!isAuth()) {
+            header('Location: /');
+        }
+        // Render a la vista 
+        $router->render('consejos/errorVSC', [
+            'titulo' => 'Instalación de Cobian Backup'
+        ]);
+    }
+
+        public static function consejosCT(Router $router)
+    {
+        if (!isAuth()) {
+            header('Location: /');
+        }
+        // Render a la vista 
+        $router->render('consejos/crearTarea', [
             'titulo' => 'Instalación de Cobian Backup'
         ]);
     }
