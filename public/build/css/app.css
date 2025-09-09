@@ -1494,9 +1494,6 @@ h3 {
 .main__h1 {
   color: #ED241C;
 }
-.main__h2 {
-  margin-top: 1.5rem;
-}
 .main__p {
   margin: 1rem 0 0 0;
 }
@@ -1626,6 +1623,11 @@ h3 {
   margin: 0 auto;
 }
 
+.card {
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  padding: 2rem;
+  border-radius: 1rem;
+}
 .card__grid {
   display: grid;
   gap: 1rem;
@@ -1637,7 +1639,23 @@ h3 {
     display: grid;
     gap: 1rem;
     grid-template-columns: repeat(2, 1fr);
+    align-items: center;
   }
+}
+.card__img {
+  border-radius: 1rem;
+}
+.card__contenido {
+  margin-left: 0;
+}
+@media (min-width: 768px) {
+  .card__contenido {
+    margin-left: 1.5rem;
+  }
+}
+.card__span {
+  font-weight: bold;
+  color: #ED241C;
 }
 .card__a {
   background-color: #ED241C;
@@ -1646,21 +1664,20 @@ h3 {
   font-size: 1.8rem;
   font-weight: 700;
   border: none;
-  transition-property: background-color, box-shadow;
+  transition-property: background-color, color, border;
   transition-duration: 0.3s;
   text-align: center;
   text-transform: uppercase;
   width: 100%;
   display: inline-block;
   border-radius: 0.5rem;
-  border: 2px solid transparent;
-  transition: border, box-shadow, background-color 0.5s ease;
+  border: 2px solid #ED241C;
+  transition: color, border, background-color 0.5s ease;
   width: auto;
 }
 .card__a:hover {
-  border: 2px solid #ED241C;
-  box-shadow: 0 0 10px #ED241C;
   background-color: transparent;
+  color: #ED241C;
   cursor: pointer;
 }
 /*# sourceMappingURL=app.css.map */

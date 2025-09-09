@@ -6,12 +6,15 @@
 }
 
 .card{
-
+    @include m.sombra;
+    padding: 2rem;
+    border-radius: 1rem;
     &__grid{
         @include m.grid(1, 1rem);
         justify-items: center;
         @include m.tablet{
             @include m.grid(2, 1rem);
+            align-items: center;
         }
     }
 
@@ -20,11 +23,14 @@
     }
 
     &__img{
-
+        border-radius: 1rem;
     }
 
     &__contenido{
-
+        margin-left: 0;
+        @include m.tablet{
+            margin-left: 1.5rem;
+        }
     }
 
     &__h3{
@@ -38,12 +44,17 @@
         }
     }
 
+    &__span{
+        font-weight: bold;
+        color: v.$principal;
+    }
+    
     &__h4{
 
     }
 
     &__a{
-        @include m.boton(v.$principal, v.$blanco);
+        @include m.botonDos(v.$principal, v.$blanco);
         width: auto;
     }
 }

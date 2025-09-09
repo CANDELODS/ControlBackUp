@@ -36,7 +36,7 @@ class ConsejosController
         }
         // Render a la vista 
         $router->render('consejos/errorVSC', [
-            'titulo' => 'Instalación de Cobian Backup'
+            'titulo' => 'Solución Error VSC'
         ]);
     }
 
@@ -47,7 +47,7 @@ class ConsejosController
         }
         // Render a la vista 
         $router->render('consejos/crearTarea', [
-            'titulo' => 'Instalación de Cobian Backup'
+            'titulo' => '¿Cómo crear una tarea en Cobian Backup?'
         ]);
     }
 }
