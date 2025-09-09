@@ -30,7 +30,7 @@
                         el error <b>"No se ha podido iniciar el solicitador de Volume Shadow Copy"</b>, el cual es bastante recurrente cuando usamos
                         Cobian Backup, para verlo, presiona el enlace que dice <span class="card__span">"Ver Instructivo"</span>.
                     </p>
-                    <a href="#" class="card__a">Ver Instructivo</a>
+                    <a href="/instructivos/Solucion al error de volumen shadow copy en cobian backup.pdf" target="_blank" rel="noopener noreferrer" class="card__a">Ver Instructivo</a>
                 </div>
             </div> <!--Fin .card__grid-->
         </div> <!--Fin .card-->
