@@ -47,7 +47,18 @@ class ConsejosController
         }
         // Render a la vista 
         $router->render('consejos/crearTarea', [
-            'titulo' => '¿Cómo crear una tarea en Cobian Backup?'
+            'titulo' => '¿Cómo crear una tarea en Cobian Backup y en Backup Manager?'
+        ]);
+    }
+
+            public static function consejosRI(Router $router)
+    {
+        if (!isAuth()) {
+            header('Location: /');
+        }
+        // Render a la vista 
+        $router->render('consejos/recuperarInfo', [
+            'titulo' => '¿Cómo restaurar la información a partir de una copia de seguridad?'
         ]);
     }
 }

@@ -27,7 +27,7 @@
                     <h2 class="box__h2">Error "no se ha podido iniciar el solicitador de Volume Shadow Copy"</h2>
                     <p class="box__p">Aprenderemos como solventar un error muy común al momento de realizar una instalación, referente al Volumen Shadow Copy (VSC).
                         Bastará con instalar previamente la versión de .Net Framework 3.5 con lo cual podremos sortear este inconveniente tan común, que lo que permite es poder respaldar archivos que se encuentren abiertos o en uso.</p>
-                        <a href="/consejos/error-VSC" class="box__btn">Ver más</a>
+                    <a href="/consejos/error-VSC" class="box__btn">Ver más</a>
                 </div>
             </div>
             <div class="box">
@@ -36,9 +36,20 @@
                     <source srcset="/build/img/tarea.webp" type="image/webp"> <img src="/build/img/tarea.png" alt="Imagen De ¿Cómo crear una tarea en Cobian Backup?" class="box__img" loading="lazy" width="200" heigth="300">
                 </picture>
                 <div class="box__contenido">
-                    <h2 class="box__h2">¿Cómo crear una tarea en Cobian Backup?</h2>
-                    <p class="box__p">Aprende a automatizar tus copias de seguridad creando tareas programadas en Cobian Backup, asegurando la protección continua de tus datos.</p> 
+                    <h2 class="box__h2">¿Cómo crear una tarea en Cobian Backup y Backup Manager?</h2>
+                    <p class="box__p">Aprende a automatizar tus copias de seguridad creando tareas programadas en Cobian Backup y Backup Manager, asegurando la protección continua de tus datos.</p>
                     <a href="/consejos/crear-tarea" class="box__btn">Ver más</a>
+                </div>
+            </div>
+            <div class="box">
+                <picture>
+                    <source srcset="/build/img/recuperar.avif" type="image/avif">
+                    <source srcset="/build/img/recuperar.webp" type="image/webp"> <img src="/build/img/recuperar.png" alt="Imagen De ¿Cómo recuperar información?" class="box__img" loading="lazy" width="200" heigth="300">
+                </picture>
+                <div class="box__contenido">
+                    <h2 class="box__h2">¿Cómo restaurar la información a partir de una copia de seguridad?</h2>
+                    <p class="box__p">Aprende a recuperar la información de un día en específico.</p>
+                    <a href="/consejos/recuperar-informacion" class="box__btn">Ver más</a>
                 </div>
             </div>
         </div>
