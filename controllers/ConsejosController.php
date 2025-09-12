@@ -61,4 +61,14 @@ class ConsejosController
             'titulo' => '¿Cómo restaurar la información a partir de una copia de seguridad?'
         ]);
     }
+                public static function consejosSI(Router $router)
+    {
+        if (!isAuth()) {
+            header('Location: /');
+        }
+        // Render a la vista 
+        $router->render('consejos/subirInfo', [
+            'titulo' => '¿Cómo subir las copias locales a la nube?'
+        ]);
+    }
 }

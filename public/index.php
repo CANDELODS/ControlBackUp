@@ -76,5 +76,6 @@ $router->get('/consejos/instalacion-cobian', [ConsejosController::class, 'consej
 $router->get('/consejos/error-VSC', [ConsejosController::class, 'consejosEVSC']);
 $router->get('/consejos/crear-tarea', [ConsejosController::class, 'consejosCT']);
 $router->get('/consejos/recuperar-informacion', [ConsejosController::class, 'consejosRI']);
+$router->get('/consejos/subir-informacion', [ConsejosController::class, 'consejosSI']);
 
 $router->comprobarRutas();

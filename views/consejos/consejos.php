@@ -52,6 +52,18 @@
                     <a href="/consejos/recuperar-informacion" class="box__btn">Ver más</a>
                 </div>
             </div>
+            <div class="box">
+                <picture>
+                    <source srcset="/build/img/nube.avif" type="image/avif">
+                    <source srcset="/build/img/nube.webp" type="image/webp"> <img src="/build/img/nube.png" alt="Imagen De Refenrencia Para La Pregunta ¿Cómo Subir Copias A La Nube?" class="box__img" loading="lazy" width="200" heigth="300">
+                </picture>
+                <div class="box__contenido">
+                    <h2 class="box__h2">¿Cómo subir las copias locales a la nube?</h2>
+                    <p class="box__p">Aprende a subir las copias de seguridad de los equipos críticos de la compañía a la nube, por medio de
+                        la aplicación de nuestro proveedor llamada Backup Manager.</p>
+                    <a href="/consejos/subir-informacion" class="box__btn">Ver más</a>
+                </div>
+            </div>
         </div>
     </div>
 </main>
