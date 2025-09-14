@@ -29,7 +29,7 @@
                     <p class="card__p--guia">Se ha realizado un instructivo con el paso a paso para <b>subir</b> las copias correctamente,
                         para verlo, presiona el enlace que dice <span class="card__span">"Ver Instructivo"</span>.
                     </p>
-                    <a href="/instructivos/Solucion al error de volumen shadow copy en cobian backup.pdf" target="_blank" rel="noopener noreferrer" class="card__a">Ver Instructivo</a>
+                    <a href="/instructivos/Subir copias al backup manager desde el servidor 9.13docx.pdf" target="_blank" rel="noopener noreferrer" class="card__a">Ver Instructivo</a>
                 </div>
             </div> <!--Fin .card__grid-->
         </div> <!--Fin .card-->

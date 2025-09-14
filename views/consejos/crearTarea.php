@@ -30,7 +30,7 @@
                         la creación de <b>tareas</b> el cual ha sido adaptado un poco, esto con el fin de dejar
                         solo la información necesaria, para verlo, presiona el enlace que dice <span class="card__span">"Ver Instructivo"</span>.
                     </p>
-                    <a href="#" class="card__a">Ver Instructivo</a>
+                    <a href="/instructivos/Creación de tareas en Cobian Backup y Backup Manager.pdf" target="_blank" rel="noopener noreferrer" class="card__a">Ver Instructivo</a>
                 </div>
             </div> <!--Fin .card__grid-->
         </div> <!--Fin .card-->

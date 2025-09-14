@@ -1406,6 +1406,7 @@ h3 {
 .navegacion__movil {
   color: #1a1b15;
   font-size: 3rem;
+  cursor: pointer;
 }
 @media (min-width: 768px) {
   .navegacion__movil {

@@ -1,10 +1,45 @@
 document.addEventListener('DOMContentLoaded', function () {
     iniciarApp();
+
+    // MENÚ MOBILE
+    const abrirMenu = document.querySelector('#abrirMenu');
+    const cerrarMenu = document.querySelector('#cerrarMenu');
+    const navegacion = document.querySelector('#navegacion');
+    const links = document.querySelectorAll('.navegacion__enlace');
+
+    //Función para abrir el menú
+    abrirMenu.addEventListener('click', function () {
+        //Agrego la clase .mostrar a la nav
+        navegacion.classList.add('mostrar');
+    });
+
+    //Función para cerrar el menú
+    cerrarMenu.addEventListener('click', function () {
+        //Elimino la clase .mostrar a la nav
+        navegacion.classList.remove('mostrar');
+    });
+
+    //Función para cerrar el menú al hacer click en un enlace
+    links.forEach(link => {
+        //Agrego el evento click a cada enlace
+        link.addEventListener('click', function () {
+            //Agrego la clase .esconder a la navegacion
+            navegacion.classList.add('esconder');
+            //Elimino la clase .mostrar a la navegacion
+            navegacion.classList.remove('mostrar');
+            //Elimino la clase .esconder a la navegacion después de 300ms
+            setTimeout(() => {
+                navegacion.classList.remove('esconder');
+            }, 300);
+        });
+    });
+    //FIN MENÚ MOBILE
+
 });
 
 function iniciarApp() {
     prepararCheckboxes();
-    manejarEnvio();
+    // manejarEnvio();
 }
 //Esta función asegura que todos los checkboxes tengan un value correcto (1 o 0)
 //en el momento en que se envíe el formulario,
@@ -29,45 +64,45 @@ function prepararCheckboxes() {
 
 //Se asegura que justo antes de enviar el formulario (con el botón submit),
 //los checkboxes vuelvan a ajustar sus valores a 1 o 0, por si algún cambio no se capturó.
-    const formulario = document.querySelector('.formulario-copia');
+const formulario = document.querySelector('.formulario-copia');
 
-    formulario.addEventListener('submit', function (e) {
-        const filas = formulario.querySelectorAll('tbody tr');
-        let equiposSinCopia = [];
+formulario.addEventListener('submit', function (e) {
+    const filas = formulario.querySelectorAll('tbody tr');
+    let equiposSinCopia = [];
 
-        filas.forEach(fila => {
-            const nombreEquipo = fila.querySelector('td[data-label="Nombre"]').innerText.trim();
-            const local = fila.querySelector('.copia-local:not([disabled])');
-            const nube = fila.querySelector('.copia-nube:not([disabled])');
+    filas.forEach(fila => {
+        const nombreEquipo = fila.querySelector('td[data-label="Nombre"]').innerText.trim();
+        const local = fila.querySelector('.copia-local:not([disabled])');
+        const nube = fila.querySelector('.copia-nube:not([disabled])');
 
-            if (local || nube) {
-                const localMarcado = local && local.checked;
-                const nubeMarcado = nube && nube.checked;
+        if (local || nube) {
+            const localMarcado = local && local.checked;
+            const nubeMarcado = nube && nube.checked;
 
-                if (!localMarcado && !nubeMarcado) {
-                    equiposSinCopia.push(nombreEquipo);
-                }
-            }
-        });
-
-        if (equiposSinCopia.length > 0) {
-            const mensaje = "⚠️ Los siguientes equipos no tienen marcada ni Local ni Nube:\n\n- " 
-                            + equiposSinCopia.join("\n- ") +
-                            "\n\n¿Deseas continuar de todas formas?";
-            
-            if (!confirm(mensaje)) {
-                e.preventDefault(); // ❌ Cancela el envío
+            if (!localMarcado && !nubeMarcado) {
+                equiposSinCopia.push(nombreEquipo);
             }
         }
     });
 
-    // Mantener la lógica de 1/0 en los checkboxes
-    const checkboxes = formulario.querySelectorAll('.checkboxes');
-    checkboxes.forEach(cb => {
-        cb.addEventListener('change', function () {
-            cb.value = cb.checked ? "1" : "0";
-        });
+    if (equiposSinCopia.length > 0) {
+        const mensaje = "⚠️ Los siguientes equipos no tienen marcada ni Local ni Nube:\n\n- "
+            + equiposSinCopia.join("\n- ") +
+            "\n\n¿Deseas continuar de todas formas?";
+
+        if (!confirm(mensaje)) {
+            e.preventDefault(); // ❌ Cancela el envío
+        }
+    }
+});
+
+// Mantener la lógica de 1/0 en los checkboxes
+const checkboxes = formulario.querySelectorAll('.checkboxes');
+checkboxes.forEach(cb => {
+    cb.addEventListener('change', function () {
+        cb.value = cb.checked ? "1" : "0";
     });
+});
 
 //Validar dias domingos en el input type date
 const inputFecha = document.querySelector('.formularioFiltro__date');
@@ -81,40 +116,6 @@ inputFecha.addEventListener('change', function () {
         inputFecha.value = ''; // Limpiar el input
     }
 });
-
-// MENÚ MOBILE
-const abrirMenu = document.querySelector('#abrirMenu');
-const cerrarMenu = document.querySelector('#cerrarMenu');
-const navegacion = document.querySelector('#navegacion');
-const links = document.querySelectorAll('.navegacion__enlace');
-
-//Función para abrir el menú
-abrirMenu.addEventListener('click', function () {
-    //Agrego la clase .mostrar a la nav
-    navegacion.classList.add('mostrar');
-});
-
-//Función para cerrar el menú
-cerrarMenu.addEventListener('click', function () {
-    //Elimino la clase .mostrar a la nav
-    navegacion.classList.remove('mostrar');
-});
-
-//Función para cerrar el menú al hacer click en un enlace
-links.forEach(link => {
-    //Agrego el evento click a cada enlace
-    link.addEventListener('click', function () {
-        //Agrego la clase .esconder a la navegacion
-        navegacion.classList.add('esconder');
-        //Elimino la clase .mostrar a la navegacion
-        navegacion.classList.remove('mostrar');
-        //Elimino la clase .esconder a la navegacion después de 300ms
-        setTimeout(() => {
-            navegacion.classList.remove('esconder');
-        }, 300);
-    });
-});
-//FIN MENÚ MOBILE
 
 //Mensaje de confirmación
 function confirmDelete(message) {
