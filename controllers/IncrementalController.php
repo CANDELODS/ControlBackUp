@@ -62,7 +62,7 @@ class IncrementalController
         }
 
         //Renderizamos la vista y mandamos las variables al front
-        $router->render('incremental/Incremental', [
+        $router->render('incremental/incremental', [
             'titulo' => 'Incremental',
             'equipos' => $equipos
         ]);
