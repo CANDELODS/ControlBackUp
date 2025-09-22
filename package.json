@@ -4,7 +4,8 @@
   "description": "Proyecto Para La Empresa Ladrillera Melendez Hecho Por El Auxiliar De Sistemas Juan Sebastian Candelo Balanta",
   "main": "index.js",
   "scripts": {
-    "dev": "gulp dev"
+    "dev": "gulp dev",
+    "build": "gulp build"
   },
   "author": "",
   "license": "ISC",
