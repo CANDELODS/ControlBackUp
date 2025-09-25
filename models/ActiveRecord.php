@@ -128,7 +128,7 @@ class ActiveRecord
     public static function allWhere($tablaB, $tipodeCopia, $idCopiaEncabezado, $orden = 'DESC')
     {
         $query = "SELECT copiasDetalle.id, copiasDetalle.idCopiasEncabezado, copiasDetalle.idEquipos,
-        copiasDetalle.copiaLocal, copiasDetalle.copiaNube, copiaDdetalle.observaciones 
+        copiasDetalle.copiaLocal, copiasDetalle.copiaNube, copiasDetalle.observaciones 
         FROM " . static::$tabla . " INNER JOIN ${tablaB} ON copiasDetalle.idCopiasEncabezado = copiasEncabezado.id 
         WHERE copiasEncabezado.tipoDeCopia = ${tipodeCopia} AND copiasDetalle.idCopiasEncabezado = ${idCopiaEncabezado} 
         ORDER BY id ${orden}";
