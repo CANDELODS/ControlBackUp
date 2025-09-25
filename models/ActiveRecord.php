@@ -129,8 +129,8 @@ class ActiveRecord
     {
         $query = "SELECT copiasdetalle.id, copiasdetalle.idCopiasEncabezado, copiasdetalle.idEquipos,
         copiasdetalle.copiaLocal, copiasdetalle.copiaNube, copiasdetalle.observaciones 
-        FROM " . static::$tabla . " INNER JOIN ${tablaB} ON copiasdetalle.idCopiasEncabezado = copiasencabezado.id 
-        WHERE copiasencabezado.tipoDeCopia = ${tipodeCopia} AND copiasdetalle.idCopiasEncabezado = ${idCopiaEncabezado} 
+        FROM " . static::$tabla . " INNER JOIN ${tablaB} ON copiasdetalle.idCopiasEncabezado = copiasEncabezado.id 
+        WHERE copiasEncabezado.tipoDeCopia = ${tipodeCopia} AND copiasdetalle.idCopiasEncabezado = ${idCopiaEncabezado} 
         ORDER BY id ${orden}";
         $resultado = self::consultarSQL($query);
         return $resultado;
