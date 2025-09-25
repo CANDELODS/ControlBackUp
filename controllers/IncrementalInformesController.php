@@ -189,7 +189,7 @@ class IncrementalInformesController
         // Obtenemos los copiaDetalle relacionados con la copiaEncabezado, ordenados por nombre de equipo
         //El método allWhere filtra los detalles por el id de la copiaEncabezado
         //1er parámetro: Nombre de la columna B, 2do parámetro: Tipo de copia, 3er parámetro: id de la copiaEncabezado, 4to parámetro: orden
-        $detalles = CopiasDetalle::allWhere('copiasencabezado', 1, $id, 'ASC');
+        $detalles = CopiasDetalle::allWhere('copiasEncabezado', 1, $id, 'ASC');
 
         // AÑADIR NOMBRES DE EQUIPOS
         foreach ($detalles as $detalle) {
@@ -585,7 +585,7 @@ class IncrementalInformesController
         //Obtenemos los copiaDetalle relacionados con la copiaEncabezado
         //El método allWhere filtra los detalles por el id de la copiaEncabezado
         //1er parámetro: Nombre de la columna B, 2do parámetro: Tipo de copia, 3er parámetro: id de la copiaEncabezado, 4to parámetro: orden
-        $detalles = CopiasDetalle::allWhere('copiasencabezado', 1, $id, 'DESC');
+        $detalles = CopiasDetalle::allWhere('copiasEncabezado', 1, $id, 'DESC');
 
         // Añadir nombres de equipos para ordenar
         foreach ($detalles as $detalle) {
