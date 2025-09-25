@@ -127,10 +127,10 @@ class ActiveRecord
     //Obtener registros dependiendo de una condición
     public static function allWhere($tablaB, $tipodeCopia, $idCopiaEncabezado, $orden = 'DESC')
     {
-        $query = "SELECT copiasdetalle.id, copiasdetalle.idCopiasEncabezado, copiasdetalle.idEquipos,
-        copiasdetalle.copiaLocal, copiasdetalle.copiaNube, copiasdetalle.observaciones 
-        FROM " . static::$tabla . " INNER JOIN ${tablaB} ON copiasdetalle.idCopiasEncabezado = copiasEncabezado.id 
-        WHERE copiasEncabezado.tipoDeCopia = ${tipodeCopia} AND copiasdetalle.idCopiasEncabezado = ${idCopiaEncabezado} 
+        $query = "SELECT copiasDetalle.id, copiasDetalle.idCopiasEncabezado, copiasDetalle.idEquipos,
+        copiasDetalle.copiaLocal, copiasDetalle.copiaNube, copiaDdetalle.observaciones 
+        FROM " . static::$tabla . " INNER JOIN ${tablaB} ON copiasDetalle.idCopiasEncabezado = copiasEncabezado.id 
+        WHERE copiasEncabezado.tipoDeCopia = ${tipodeCopia} AND copiasDetalle.idCopiasEncabezado = ${idCopiaEncabezado} 
         ORDER BY id ${orden}";
         $resultado = self::consultarSQL($query);
         return $resultado;
