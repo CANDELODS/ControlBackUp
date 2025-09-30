@@ -11,9 +11,10 @@
             <a href="/copias" class="main__btn main__btn--e">Cargar Copia</a>
         </div>
     </div>
+
     <form action="" class="formulario-copia" method="post" onsubmit="return confirmDelete('¿Estás seguro de que deseas guardar?')">
         <div class="tabla--scroll">
-            <!-- Verifficamos si hay equipos para mostrar -->
+            <!-- Verificamos si hay equipos para mostrar -->
             <?php if (!empty($equipos)) { ?>
                 <table class="table">
                     <thead class="table__thead">
@@ -27,72 +28,72 @@
                     </thead>
                     <tbody class="table__tbody">
                         <!-- Iteramos equipo por equipo -->
-                        <?php foreach ($equipos as $equipo) { ?>
-                            <!--Verificamos si el equipo está habilitado (1 = SI / 0 = NO) para así mostrarlo en una fila o no-->
-                            <?php if ($equipo->habilitado === '1'): ?>
-                                <tr class="table__tr">
-                                    <td data-label="Nombre" class="table__td">
-                                        <!-- Mostramos el nombre de cada equipo y creamos un arreglo con sus ids y lo llenamos con sus values -->
-                                        <input type="hidden" name="idEquipos[]" value="<?php echo $equipo->id; ?>">
-                                        <?php echo $equipo->nombreEquipo; ?>
-                                    </td>
-                                    <td data-label="Área" class="table__td">
-                                        <!-- Mostramos el área de cada equipo -->
-                                        <?php echo $equipo->idAreas->nombreArea; ?>
-                                    </td>
-                                    <td data-label="Local" class="table__td">
-                                        <!-- Si el equipo NO hace copia local entonces deshabilitamos el checkbox, creamos el
-                                     arreglo copiaLocal y lo llenamos con su value que en este caso el 0 representa un NO,
-                                     De lo contrario, habilitamos el checkbox y cuando el usuario le haga click cambiamos
-                                     su value de 0 (No) a 1 (Si) -->
-                                        <?php if ($equipo->local === '0') : ?>
-                                            <input type="hidden" name="copiaLocal[]" value="0">
-                                            <input type="checkbox" class="formulario-copia__input--check checkboxes" disabled>
-                                        <?php else : ?>
-                                            <input type="checkbox"
-                                                class="formulario-copia__input--check checkboxes copia-local"
-                                                name="copiaLocal[]"
-                                                value="0">
-                                        <?php endif; ?>
-                                    </td>
-                                    <td data-label="Nube" class="table__td">
-                                        <!-- Si el equipo NO hace copia en nube entonces deshabilitamos el checkbox, creamos el
-                                     arreglo copiaNube y lo llenamos con su value que en este caso el 0 representa un NO,
-                                     De lo contrario, habilitamos el checkbox y cuando el usuario le haga click cambiamos
-                                     su value de 0 (No) a 1 (Si) -->
-                                        <?php if ($equipo->nube === '0') : ?>
-                                            <input type="hidden" name="copiaNube[]" value="0">
-                                            <input type="checkbox" class="formulario-copia__input--check checkboxes" disabled>
-                                        <?php else : ?>
-                                            <input type="checkbox"
-                                                class="formulario-copia__input--check checkboxes copia-nube"
-                                                name="copiaNube[]"
-                                                value="0">
-                                        <?php endif; ?>
-                                    </td>
-                                    <td class="table__td">
-                                        <!-- Creamos el arreglo de observaciones el cual se llenará con el texto digitado por el usuario -->
-                                        <textarea name="observaciones[]" class="formulario-copia__textarea"
-                                            placeholder="Escribe Aquí Las Observaciones"></textarea>
-                                    </td>
-                                </tr>
-                            <?php else : ?>
-                            <?php endif; ?> <!--if ($equipo->habilitado === '1')-->
-                        <?php } ?> <!--Fin foreach($equipos as $equipo)-->
+                        <?php
+                        $rowIndex = 0;
+                        foreach ($equipos as $equipo) {
+                            if ($equipo->habilitado !== '1') {
+                                continue;
+                            }
+                        ?>
+                            <tr class="table__tr">
+                                <td data-label="Nombre" class="table__td">
+                                    <!-- Envío del id con clave numérica para mantener el mapeo -->
+                                    <input type="hidden" name="idEquipos[<?php echo $rowIndex; ?>]" value="<?php echo (int)$equipo->id; ?>">
+                                    <?php echo htmlspecialchars($equipo->nombreEquipo); ?>
+                                </td>
+
+                                <td data-label="Área" class="table__td">
+                                    <?php echo htmlspecialchars($equipo->idAreas->nombreArea); ?>
+                                </td>
+
+                                <td data-label="Local" class="table__td">
+                                    <?php if ($equipo->local === '0') : ?>
+                                        <input type="hidden" name="copiaLocal[<?php echo $rowIndex; ?>]" value="0">
+                                        <input type="checkbox" class="formulario-copia__input--check checkboxes" disabled>
+                                    <?php else : ?>
+                                        <input type="hidden" name="copiaLocal[<?php echo $rowIndex; ?>]" value="0">
+                                        <input type="checkbox"
+                                            class="formulario-copia__input--check checkboxes copia-local"
+                                            name="copiaLocal[<?php echo $rowIndex; ?>]"
+                                            value="1">
+                                    <?php endif; ?>
+                                </td>
+
+                                <td data-label="Nube" class="table__td">
+                                    <?php if ($equipo->nube === '0') : ?>
+                                        <input type="hidden" name="copiaNube[<?php echo $rowIndex; ?>]" value="0">
+                                        <input type="checkbox" class="formulario-copia__input--check checkboxes" disabled>
+                                    <?php else : ?>
+                                        <input type="hidden" name="copiaNube[<?php echo $rowIndex; ?>]" value="0">
+                                        <input type="checkbox"
+                                            class="formulario-copia__input--check checkboxes copia-nube"
+                                            name="copiaNube[<?php echo $rowIndex; ?>]"
+                                            value="1">
+                                    <?php endif; ?>
+                                </td>
+
+                                <td class="table__td">
+                                    <textarea name="observaciones[<?php echo $rowIndex; ?>]" class="formulario-copia__textarea"
+                                        placeholder="Escribe Aquí Las Observaciones"></textarea>
+                                </td>
+                            </tr>
+                        <?php
+                            $rowIndex++;
+                        } ?>
                     </tbody>
                 </table>
             <?php } else { ?>
                 <p class="text-center">No Hay Equipos Para Listar</p>
-            <?php } ?> <!--Fin if(!empty($equipos))-->
+            <?php } ?>
         </div>
+
         <div class="main__fi">
-            <!-- Mostramos la fecha del día actual y seteamos la hora del servidor -->
             <?php date_default_timezone_set('America/Bogota'); ?>
             <p class="main__f"><?php echo date('Y-m-d'); ?></p>
             <input type="submit" class="formulario-copia__btn" value="Guardar">
         </div>
     </form>
-    <!-- No necesitamos paginación en este archivo ya que estamos usando un scroll en la tabla -->
+
     <div class="main__descargarI">
         <h6 class="main__h6">Descargar Informes</h6>
         <a href="/completa-descargar-diaria" class="main__btn main__btn--d">Diaria</a>

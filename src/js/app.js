@@ -64,45 +64,58 @@ function prepararCheckboxes() {
 
 //Se asegura que justo antes de enviar el formulario (con el botón submit),
 //los checkboxes vuelvan a ajustar sus valores a 1 o 0, por si algún cambio no se capturó.
+
+// ----------------------
+// Código para manejar validaciones y valores de checkboxes
+// ----------------------
 const formulario = document.querySelector('.formulario-copia');
 
-formulario.addEventListener('submit', function (e) {
-    const filas = formulario.querySelectorAll('tbody tr');
-    let equiposSinCopia = [];
+if (formulario) {
+    // Validación antes de enviar (lista de equipos sin copia)
+    formulario.addEventListener('submit', function (e) {
+        const filas = formulario.querySelectorAll('tbody tr');
+        let equiposSinCopia = [];
 
-    filas.forEach(fila => {
-        const nombreEquipo = fila.querySelector('td[data-label="Nombre"]').innerText.trim();
-        const local = fila.querySelector('.copia-local:not([disabled])');
-        const nube = fila.querySelector('.copia-nube:not([disabled])');
+        filas.forEach(fila => {
+            const nombreEquipo = fila.querySelector('td[data-label="Nombre"]').innerText.trim();
+            const local = fila.querySelector('.copia-local:not([disabled])');
+            const nube = fila.querySelector('.copia-nube:not([disabled])');
 
-        if (local || nube) {
-            const localMarcado = local && local.checked;
-            const nubeMarcado = nube && nube.checked;
+            if (local || nube) {
+                const localMarcado = local && local.checked;
+                const nubeMarcado = nube && nube.checked;
 
-            if (!localMarcado && !nubeMarcado) {
-                equiposSinCopia.push(nombreEquipo);
+                if (!localMarcado && !nubeMarcado) {
+                    equiposSinCopia.push(nombreEquipo);
+                }
+            }
+        });
+
+        if (equiposSinCopia.length > 0) {
+            const mensaje = "⚠️ Los siguientes equipos no tienen marcada ni Local ni Nube:\n\n- "
+                + equiposSinCopia.join("\n- ") +
+                "\n\n¿Deseas continuar de todas formas?";
+
+            if (!confirm(mensaje)) {
+                e.preventDefault(); // ❌ Cancela el envío
             }
         }
     });
 
-    if (equiposSinCopia.length > 0) {
-        const mensaje = "⚠️ Los siguientes equipos no tienen marcada ni Local ni Nube:\n\n- "
-            + equiposSinCopia.join("\n- ") +
-            "\n\n¿Deseas continuar de todas formas?";
-
-        if (!confirm(mensaje)) {
-            e.preventDefault(); // ❌ Cancela el envío
-        }
-    }
-});
-
-// Mantener la lógica de 1/0 en los checkboxes
-const checkboxes = formulario.querySelectorAll('.checkboxes');
-checkboxes.forEach(cb => {
-    cb.addEventListener('change', function () {
-        cb.value = cb.checked ? "1" : "0";
+    // Mantener la lógica de 1/0 opcional (no necesario ahora porque usamos hidden inputs),
+    // pero lo dejamos por compatibilidad: forzamos que el checkbox tenga value "1" cuando esté marcado.
+    const checkboxes = formulario.querySelectorAll('.checkboxes');
+    checkboxes.forEach(cb => {
+        cb.value = cb.checked ? "1" : "1"; // dejamos '1' por defecto; el hidden controla el 0 cuando no se envía el checkbox
+        cb.addEventListener('change', function () {
+            // No es esencial: el checkbox solo se envía cuando está marcado y tendrá value="1".
+            // Si quieres que el checkbox también envíe 0 al desmarcar (NO recomendable con hidden+same-key),
+            // habría que reestructurar totalmente la forma de enviar. Con hidden+same-key es correcto.
+            this.value = this.checked ? "1" : "1";
+        });
     });
-});
+}
+
 
 //Validar dias domingos en el input type date
 const inputFecha = document.querySelector('.formularioFiltro__date');
