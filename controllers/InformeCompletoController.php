@@ -194,7 +194,7 @@ class InformeCompletoController
         $pdf->AddPage();
 
         $pdf->SetFont('helvetica', 'B', 14);
-        $pdf->Cell(0, 10, "Informe Mensual Completas - $fecha", 0, 1, 'C');
+        $pdf->Cell(0, 10, "Informe Mensual Completo - $fecha", 0, 1, 'C');
 
         // Tabla principal
         $html = '<table border="1" cellpadding="4">
